@@ -5,10 +5,12 @@ import { Navigate, Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { useAppSelector } from "../../app/hooks";
+import { useSignalR } from "../../signalr/useSignalR";
 
 export default function AppContainer() {
   const isAuthenticated = useAppSelector((s) => s.auth.isAuthenticated);
   const [mobileOpen, setMobileOpen] = useState(false);
+  useSignalR();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
