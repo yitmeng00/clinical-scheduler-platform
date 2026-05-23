@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import FormField from "../../../components/ui/FormField";
 import { useGetDepartmentsQuery } from "../../../services/departmentsApi";
@@ -7,7 +7,8 @@ import {
   useCreateStaffMutation,
   useUpdateStaffMutation,
 } from "../../../services/staffApi";
-import type { StaffMember } from "../../../types/user";
+import type { StaffRole } from "../../../types/auth";
+import type { EmploymentType, StaffMember } from "../../../types/user";
 
 const ROLES = [
   "Admin",
@@ -39,7 +40,10 @@ interface StaffFormModalProps {
   onClose: () => void;
 }
 
-export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) {
+export default function StaffFormModal({
+  staff,
+  onClose,
+}: StaffFormModalProps) {
   const isEdit = !!staff;
   const { data: departments = [] } = useGetDepartmentsQuery();
   const [createStaff, { isLoading: creating }] = useCreateStaffMutation();
@@ -59,11 +63,8 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
   );
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (departments.length > 0 && !departmentId) {
-      setDepartmentId(String(departments[0].id));
-    }
-  }, [departments, departmentId]);
+  const effectiveDepartmentId =
+    departmentId || (departments[0] ? String(departments[0].id) : "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +82,7 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
           fullName: fullName.trim(),
           email: email.trim(),
           role,
-          departmentId: Number(departmentId),
+          departmentId: Number(effectiveDepartmentId),
           phone: phone.trim() || undefined,
           employmentType,
         }).unwrap();
@@ -91,7 +92,7 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
           email: email.trim(),
           password: password.trim(),
           role,
-          departmentId: Number(departmentId),
+          departmentId: Number(effectiveDepartmentId),
           phone: phone.trim() || undefined,
           employmentType,
         }).unwrap();
@@ -160,7 +161,7 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
             <FormField label="Role">
               <select
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
+                onChange={(e) => setRole(e.target.value as StaffRole)}
                 className="form-input w-full rounded-lg text-sm px-3 py-2 focus:outline-none"
               >
                 {ROLES.map((r) => (
@@ -173,7 +174,7 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
 
             <FormField label="Department">
               <select
-                value={departmentId}
+                value={effectiveDepartmentId}
                 onChange={(e) => setDepartmentId(e.target.value)}
                 className="form-input w-full rounded-lg text-sm px-3 py-2 focus:outline-none"
               >
@@ -200,7 +201,9 @@ export default function StaffFormModal({ staff, onClose }: StaffFormModalProps) 
             <FormField label="Employment Type">
               <select
                 value={employmentType}
-                onChange={(e) => setEmploymentType(e.target.value)}
+                onChange={(e) =>
+                  setEmploymentType(e.target.value as EmploymentType)
+                }
                 className="form-input w-full rounded-lg text-sm px-3 py-2 focus:outline-none"
               >
                 {EMPLOYMENT_TYPES.map((t) => (
