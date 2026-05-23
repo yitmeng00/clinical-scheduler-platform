@@ -1,6 +1,6 @@
 # CareShift — Clinical Staff Scheduling Platform
 
-A full-stack web application for managing clinical staff schedules, leave requests, shift swaps, and workforce analytics. Built with Clean Architecture on ASP.NET Core 10 and React 19, with real-time updates via SignalR.
+A full-stack responsive application for managing clinical staff schedules, leave requests, shift swaps, and workforce analytics. Built with Clean Architecture on ASP.NET Core 10 and React 19, with real-time updates via SignalR.
 
 ---
 
