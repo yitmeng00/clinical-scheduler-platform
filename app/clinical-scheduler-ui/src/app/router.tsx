@@ -1,11 +1,12 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
 import AppContainer from "../components/layout/AppContainer";
-import ComingSoon from "../components/ui/ComingSoon";
 import LoginPage from "../features/auth/LoginPage";
 import DashboardPage from "../features/dashboard/DashboardPage";
 import LeavesPage from "../features/leaves/LeavesPage";
 import SchedulePage from "../features/schedule/SchedulePage";
+import AuditPage from "../features/audit/AuditPage";
+import OvertimePage from "../features/overtime/OvertimePage";
 import StaffPage from "../features/staff/StaffPage";
 import SwapsPage from "../features/swaps/SwapsPage";
 
@@ -34,7 +35,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "overtime",
-        element: <ComingSoon />,
+        element: <OvertimePage />,
       },
       {
         path: "staff",
@@ -42,7 +43,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "audit",
-        element: <ComingSoon />,
+        element: <AuditPage />,
       },
     ],
   },
