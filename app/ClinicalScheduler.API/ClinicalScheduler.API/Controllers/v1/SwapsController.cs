@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Asp.Versioning;
+using ClinicalScheduler.API.Hubs;
 using ClinicalScheduler.Application.Swaps.Commands.Cancel;
 using ClinicalScheduler.Application.Swaps.Commands.Respond;
 using ClinicalScheduler.Application.Swaps.Commands.Review;
@@ -8,6 +9,7 @@ using ClinicalScheduler.Application.Swaps.Queries.GetSwapRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ClinicalScheduler.API.Controllers.v1;
 
@@ -15,7 +17,7 @@ namespace ClinicalScheduler.API.Controllers.v1;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [Authorize]
-public class SwapsController(IMediator mediator) : ControllerBase
+public class SwapsController(IMediator mediator, IHubContext<ScheduleHub> hub) : ControllerBase
 {
     private int CallerId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     private int CallerDeptId => int.Parse(User.FindFirstValue("departmentId")!);
@@ -34,6 +36,8 @@ public class SwapsController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(
             new SubmitSwapCommand(CallerId, CallerName, body.RequesterShiftId, body.RequesteeShiftId, body.Reason), ct);
+        await hub.Clients.Group($"user:{result.RequesteeId}").SendAsync(
+            "SwapRequested", new { requesterName = result.RequesterName }, ct);
         return CreatedAtAction(nameof(GetAll), result);
     }
 
@@ -42,6 +46,9 @@ public class SwapsController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(
             new RespondSwapCommand(id, CallerId, CallerName, body.Action, body.Note), ct);
+        if (result.Status == "PendingAdmin")
+            await hub.Clients.Group("role:reviewer").SendAsync(
+                "SwapResponded", new { requesteeName = result.RequesteeName }, ct);
         return Ok(result);
     }
 
@@ -53,6 +60,9 @@ public class SwapsController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(
             new ReviewSwapCommand(id, CallerId, CallerName, body.Action, body.Note), ct);
+        var payload = new { status = result.Status, requesterName = result.RequesterName, requesteeName = result.RequesteeName };
+        await hub.Clients.Group($"user:{result.RequesterId}").SendAsync("SwapReviewed", payload, ct);
+        await hub.Clients.Group($"user:{result.RequesteeId}").SendAsync("SwapReviewed", payload, ct);
         return Ok(result);
     }
 
