@@ -16,7 +16,10 @@ export interface OvertimeRecord {
 
 export const overtimeApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    getOvertimeReport: builder.query<OvertimeRecord[], { from: string; to: string }>({
+    getOvertimeReport: builder.query<
+      OvertimeRecord[],
+      { from: string; to: string }
+    >({
       query: ({ from, to }) => ({ url: "/overtime", params: { from, to } }),
     }),
   }),

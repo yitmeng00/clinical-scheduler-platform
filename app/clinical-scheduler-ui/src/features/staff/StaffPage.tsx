@@ -55,11 +55,15 @@ export default function StaffPage() {
 
   const filtered = staff.filter((s) => {
     if (!showInactive && !s.isActive) return false;
-    if (deptFilter !== "all" && s.departmentId !== Number(deptFilter)) return false;
+    if (deptFilter !== "all" && s.departmentId !== Number(deptFilter))
+      return false;
     if (roleFilter !== "all" && s.role !== roleFilter) return false;
     if (search) {
       const q = search.toLowerCase();
-      if (!s.fullName.toLowerCase().includes(q) && !s.email.toLowerCase().includes(q))
+      if (
+        !s.fullName.toLowerCase().includes(q) &&
+        !s.email.toLowerCase().includes(q)
+      )
         return false;
     }
     return true;
@@ -143,7 +147,9 @@ export default function StaffPage() {
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {isLoading ? (
-          <div className="py-16 text-center text-sm text-slate-400">Loading…</div>
+          <div className="py-16 text-center text-sm text-slate-400">
+            Loading…
+          </div>
         ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-sm text-slate-400">
             No staff members found.
@@ -191,8 +197,12 @@ export default function StaffPage() {
                         {member.initials}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{member.fullName}</p>
-                        <p className="text-xs text-slate-400 md:hidden">{member.email}</p>
+                        <p className="font-medium text-slate-800">
+                          {member.fullName}
+                        </p>
+                        <p className="text-xs text-slate-400 md:hidden">
+                          {member.email}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -207,7 +217,8 @@ export default function StaffPage() {
                     <span
                       className={clsx(
                         "px-2.5 py-1 rounded-full text-xs font-medium",
-                        ROLE_STYLE[member.role] ?? "bg-slate-100 text-slate-600",
+                        ROLE_STYLE[member.role] ??
+                          "bg-slate-100 text-slate-600",
                       )}
                     >
                       {ROLE_LABELS[member.role] ?? member.role}
@@ -221,7 +232,8 @@ export default function StaffPage() {
 
                   {/* Employment type */}
                   <td className="px-3 py-3.5 text-slate-500 hidden lg:table-cell">
-                    {EMPLOYMENT_LABELS[member.employmentType] ?? member.employmentType}
+                    {EMPLOYMENT_LABELS[member.employmentType] ??
+                      member.employmentType}
                   </td>
 
                   {/* Status */}
@@ -283,7 +295,10 @@ export default function StaffPage() {
         <StaffFormModal staff={editing} onClose={() => setEditing(null)} />
       )}
       {resetting && (
-        <ResetPasswordModal staff={resetting} onClose={() => setResetting(null)} />
+        <ResetPasswordModal
+          staff={resetting}
+          onClose={() => setResetting(null)}
+        />
       )}
     </div>
   );

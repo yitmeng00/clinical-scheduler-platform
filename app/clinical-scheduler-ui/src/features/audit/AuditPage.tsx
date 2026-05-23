@@ -117,7 +117,9 @@ export default function AuditPage() {
                 <div
                   className={clsx(
                     "absolute left-2.5 top-3.5 w-3 h-3 rounded-full border-2 border-white",
-                    entry.category === "Leave" ? "bg-blue-400" : "bg-violet-400",
+                    entry.category === "Leave"
+                      ? "bg-blue-400"
+                      : "bg-violet-400",
                   )}
                 />
                 <div className="flex-1 bg-white rounded-xl border border-slate-100 px-4 py-3 hover:border-slate-200 transition-colors">
@@ -125,7 +127,8 @@ export default function AuditPage() {
                     <span
                       className={clsx(
                         "px-2 py-0.5 rounded-full text-xs font-semibold",
-                        CATEGORY_STYLE[entry.category] ?? "bg-slate-100 text-slate-600",
+                        CATEGORY_STYLE[entry.category] ??
+                          "bg-slate-100 text-slate-600",
                       )}
                     >
                       {entry.category}
@@ -133,7 +136,8 @@ export default function AuditPage() {
                     <span
                       className={clsx(
                         "px-2 py-0.5 rounded-full text-xs font-medium capitalize",
-                        ACTION_STYLE[entry.action] ?? "bg-slate-100 text-slate-600",
+                        ACTION_STYLE[entry.action] ??
+                          "bg-slate-100 text-slate-600",
                       )}
                     >
                       {entry.action}

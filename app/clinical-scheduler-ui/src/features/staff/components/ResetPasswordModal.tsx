@@ -10,7 +10,10 @@ interface ResetPasswordModalProps {
   onClose: () => void;
 }
 
-export default function ResetPasswordModal({ staff, onClose }: ResetPasswordModalProps) {
+export default function ResetPasswordModal({
+  staff,
+  onClose,
+}: ResetPasswordModalProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -19,9 +22,18 @@ export default function ResetPasswordModal({ staff, onClose }: ResetPasswordModa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!newPassword.trim()) { setError("Password is required."); return; }
-    if (newPassword.length < 6) { setError("Password must be at least 6 characters."); return; }
-    if (newPassword !== confirm) { setError("Passwords do not match."); return; }
+    if (!newPassword.trim()) {
+      setError("Password is required.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+    if (newPassword !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
     try {
       await resetPassword({ id: staff.id, newPassword }).unwrap();
       onClose();
@@ -41,7 +53,9 @@ export default function ResetPasswordModal({ staff, onClose }: ResetPasswordModa
       >
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Reset Password</h2>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Reset Password
+            </h2>
             <p className="text-sm text-slate-500 mt-0.5">{staff.fullName}</p>
           </div>
           <button

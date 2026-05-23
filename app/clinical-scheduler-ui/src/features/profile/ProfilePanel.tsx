@@ -2,10 +2,7 @@ import clsx from "clsx";
 import { KeyRound, User, X } from "lucide-react";
 import { useState } from "react";
 
-import {
-  useChangePasswordMutation,
-  useGetMyProfileQuery,
-} from "./profileApi";
+import { useChangePasswordMutation, useGetMyProfileQuery } from "./profileApi";
 import FormField from "../../components/ui/FormField";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -45,10 +42,7 @@ export default function ProfilePanel({ onClose }: ProfilePanelProps) {
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-300 bg-black/20"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 z-300 bg-black/20" onClick={onClose} />
 
       {/* Drawer */}
       <div className="fixed top-0 right-0 z-300 h-full w-full max-w-sm bg-white shadow-2xl flex flex-col">
@@ -111,11 +105,7 @@ export default function ProfilePanel({ onClose }: ProfilePanelProps) {
 
             {/* Tab content */}
             <div className="flex-1 overflow-y-auto px-5 py-5">
-              {tab === "info" ? (
-                <InfoTab profile={profile} />
-              ) : (
-                <PasswordTab />
-              )}
+              {tab === "info" ? <InfoTab profile={profile} /> : <PasswordTab />}
             </div>
           </>
         )}
@@ -124,10 +114,18 @@ export default function ProfilePanel({ onClose }: ProfilePanelProps) {
   );
 }
 
-function InfoTab({ profile }: { profile: NonNullable<ReturnType<typeof useGetMyProfileQuery>["data"]> }) {
+function InfoTab({
+  profile,
+}: {
+  profile: NonNullable<ReturnType<typeof useGetMyProfileQuery>["data"]>;
+}) {
   const rows: { label: string; value: string }[] = [
     { label: "Department", value: profile.department },
-    { label: "Employment", value: EMPLOYMENT_LABELS[profile.employmentType] ?? profile.employmentType },
+    {
+      label: "Employment",
+      value:
+        EMPLOYMENT_LABELS[profile.employmentType] ?? profile.employmentType,
+    },
     { label: "Phone", value: profile.phone ?? "—" },
     { label: "Email", value: profile.email },
   ];
