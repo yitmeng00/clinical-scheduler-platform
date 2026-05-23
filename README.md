@@ -74,7 +74,7 @@ CareShift addresses the operational challenges of managing clinical staff across
 
 ### Notifications
 
-![Profile](docs/screenshots/notification.png)
+![Notification](docs/screenshots/notification.png)
 
 ---
 
