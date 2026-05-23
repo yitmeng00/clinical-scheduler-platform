@@ -6,7 +6,7 @@ import {
 
 let connection: HubConnection | null = null;
 
-export const createScheduleHubConnection = (
+const createScheduleHubConnection = (
   getToken: () => Promise<string>,
 ): HubConnection => {
   connection = new HubConnectionBuilder()
@@ -17,10 +17,6 @@ export const createScheduleHubConnection = (
     .configureLogging(LogLevel.Warning)
     .build();
 
-  return connection;
-};
-
-export const getScheduleHubConnection = (): HubConnection | null => {
   return connection;
 };
 
