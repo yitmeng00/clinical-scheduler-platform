@@ -42,8 +42,8 @@ export default function PendingLeavesPanel({
   isLoading,
 }: PendingLeavesPanelProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-slate-200 h-full flex flex-col">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
         <h2 className="text-sm font-semibold text-slate-900">
           Pending Leave Requests
         </h2>
@@ -53,7 +53,7 @@ export default function PendingLeavesPanel({
           </span>
         )}
       </div>
-      <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+      <div className="flex-1 divide-y divide-slate-100 overflow-y-auto">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)
         ) : leaves && leaves.length > 0 ? (

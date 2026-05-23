@@ -31,8 +31,8 @@ export default function TodayShiftsPanel({
   isLoading,
 }: TodayShiftsPanelProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200">
-      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-slate-200 h-full flex flex-col">
+      <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
         <h2 className="text-sm font-semibold text-slate-900">Today's Shifts</h2>
         {!isLoading && shifts && (
           <span className="text-xs text-slate-400">
@@ -40,7 +40,7 @@ export default function TodayShiftsPanel({
           </span>
         )}
       </div>
-      <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+      <div className="flex-1 divide-y divide-slate-100 overflow-y-auto">
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} />)
         ) : shifts && shifts.length > 0 ? (
