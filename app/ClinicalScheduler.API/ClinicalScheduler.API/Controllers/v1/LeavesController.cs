@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Asp.Versioning;
+using ClinicalScheduler.API.Hubs;
 using ClinicalScheduler.Application.Leaves.Commands.CancelLeave;
 using ClinicalScheduler.Application.Leaves.Commands.ReviewLeave;
 using ClinicalScheduler.Application.Leaves.Commands.SubmitLeave;
@@ -9,6 +10,7 @@ using ClinicalScheduler.Application.Leaves.Queries.GetLeaveRequests;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ClinicalScheduler.API.Controllers.v1;
 
@@ -16,7 +18,7 @@ namespace ClinicalScheduler.API.Controllers.v1;
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [Authorize]
-public class LeavesController(IMediator mediator) : ControllerBase
+public class LeavesController(IMediator mediator, IHubContext<ScheduleHub> hub) : ControllerBase
 {
     private int CallerId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     private int CallerDeptId => int.Parse(User.FindFirstValue("departmentId")!);
@@ -46,6 +48,8 @@ public class LeavesController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(
             new SubmitLeaveCommand(CallerId, body.LeaveType, body.StartDate, body.EndDate, body.Reason), ct);
+        await hub.Clients.Group("role:reviewer").SendAsync(
+            "LeaveSubmitted", new { staffName = result.StaffFullName, leaveType = result.LeaveType }, ct);
         return CreatedAtAction(nameof(GetAll), result);
     }
 
@@ -57,6 +61,8 @@ public class LeavesController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(
             new ReviewLeaveCommand(id, CallerId, CallerName, body.Action, body.Note), ct);
+        await hub.Clients.Group($"user:{result.StaffId}").SendAsync(
+            "LeaveReviewed", new { status = result.Status, leaveType = result.LeaveType }, ct);
         return Ok(result);
     }
 

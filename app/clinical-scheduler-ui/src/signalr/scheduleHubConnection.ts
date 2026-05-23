@@ -27,7 +27,7 @@ export const getScheduleHubConnection = (): HubConnection | null => {
 export const startScheduleHub = async (
   getToken: () => Promise<string>,
 ): Promise<HubConnection> => {
-  if (connection?.state === "Connected") return connection;
+  if (connection && connection.state !== "Disconnected") return connection;
 
   const hub = createScheduleHubConnection(getToken);
   await hub.start();
