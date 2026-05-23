@@ -7,18 +7,19 @@ A full-stack responsive application for managing clinical staff schedules, leave
 ## Table of Contents
 
 1. [Overview](#1-overview)
-2. [Technology Stack](#2-technology-stack)
-3. [Architecture](#3-architecture)
-4. [Project Structure](#4-project-structure)
-5. [Domain Model](#5-domain-model)
-6. [Role Permissions](#6-role-permissions)
-7. [Feature Modules](#7-feature-modules)
-8. [Approval Workflows](#8-approval-workflows)
-9. [Authentication & Security](#9-authentication--security)
-10. [Real-Time Notifications](#10-real-time-notifications)
-11. [API Reference](#11-api-reference)
-12. [Getting Started](#12-getting-started)
-13. [License](#13-license)
+2. [Screenshots](#2-screenshots)
+3. [Technology Stack](#3-technology-stack)
+4. [Architecture](#4-architecture)
+5. [Project Structure](#5-project-structure)
+6. [Domain Model](#6-domain-model)
+7. [Role Permissions](#7-role-permissions)
+8. [Feature Modules](#8-feature-modules)
+9. [Approval Workflows](#9-approval-workflows)
+10. [Authentication & Security](#10-authentication--security)
+11. [Real-Time Notifications](#11-real-time-notifications)
+12. [API Reference](#12-api-reference)
+13. [Getting Started](#13-getting-started)
+14. [License](#14-license)
 
 ---
 
@@ -35,38 +36,80 @@ CareShift addresses the operational challenges of managing clinical staff across
 
 ---
 
-## 2. Technology Stack
+## 2. Screenshots
 
-### Backend
+> Place screenshot files in `docs/screenshots/` and they will render here automatically.
 
-| Layer | Technology |
-|---|---|
-| Runtime | .NET 10 / ASP.NET Core 10 |
-| Architecture | Clean Architecture + CQRS via MediatR |
-| ORM | Entity Framework Core 10 |
-| Database | PostgreSQL (Npgsql provider) |
-| Authentication | JWT Bearer + httpOnly Refresh Token cookie |
-| Real-time | ASP.NET Core SignalR |
-| Validation | FluentValidation |
-| API versioning | Asp.Versioning |
+### Dashboard
 
-### Frontend
+![Dashboard](docs/screenshots/dashboard.png)
 
-| Category | Technology |
-|---|---|
-| Framework | React 19 + TypeScript |
-| State management | Redux Toolkit + RTK Query |
-| Routing | React Router v7 |
-| Forms | React Hook Form + Zod |
-| Styling | Tailwind CSS v4 |
-| UI components | Lucide React |
-| Drag and drop | @dnd-kit/core |
-| Real-time | @microsoft/signalr v10 |
-| Build tool | Vite 8 |
+### Schedule — Weekly View
+
+![Schedule](docs/screenshots/schedule.png)
+
+### Leave Requests
+
+![Leave Requests](docs/screenshots/leaves.png)
+
+### Shift Swaps
+
+![Shift Swaps](docs/screenshots/swaps.png)
+
+### Staff Management
+
+![Staff Management](docs/screenshots/staff.png)
+
+### Overtime Tracker
+
+![Overtime Tracker](docs/screenshots/overtime.png)
+
+### Audit Log
+
+![Audit Log](docs/screenshots/audit.png)
+
+### Profile
+
+![Profile](docs/screenshots/profile.png)
+
+### Notifications
+
+![Profile](docs/screenshots/notification.png)
 
 ---
 
-## 3. Architecture
+## 3. Technology Stack
+
+### Backend
+
+| Layer          | Technology                                 |
+| -------------- | ------------------------------------------ |
+| Runtime        | .NET 10 / ASP.NET Core 10                  |
+| Architecture   | Clean Architecture + CQRS via MediatR      |
+| ORM            | Entity Framework Core 10                   |
+| Database       | PostgreSQL (Npgsql provider)               |
+| Authentication | JWT Bearer + httpOnly Refresh Token cookie |
+| Real-time      | ASP.NET Core SignalR                       |
+| Validation     | FluentValidation                           |
+| API versioning | Asp.Versioning                             |
+
+### Frontend
+
+| Category         | Technology                |
+| ---------------- | ------------------------- |
+| Framework        | React 19 + TypeScript     |
+| State management | Redux Toolkit + RTK Query |
+| Routing          | React Router v7           |
+| Forms            | React Hook Form + Zod     |
+| Styling          | Tailwind CSS v4           |
+| UI components    | Lucide React              |
+| Drag and drop    | @dnd-kit/core             |
+| Real-time        | @microsoft/signalr v10    |
+| Build tool       | Vite 8                    |
+
+---
+
+## 4. Architecture
 
 ### Backend — Clean Architecture
 
@@ -116,7 +159,7 @@ Each feature owns its page component, sub-components, and RTK Query endpoints. T
 
 ---
 
-## 4. Project Structure
+## 5. Project Structure
 
 ```
 clinical-scheduler-platform/
@@ -153,7 +196,7 @@ clinical-scheduler-platform/
 
 ---
 
-## 5. Domain Model
+## 6. Domain Model
 
 ### Entities
 
@@ -196,39 +239,39 @@ RefreshToken
 
 ### Enumerations
 
-| Enum | Values |
-|---|---|
-| `StaffRole` | `Admin`, `DepartmentLead`, `ChargeNurse`, `Doctor`, `Nurse`, `Receptionist` |
-| `EmploymentType` | `FullTime`, `PartTime`, `Contract` |
-| `ShiftType` | `Morning`, `Afternoon`, `Night` |
-| `LeaveType` | `Annual`, `Sick`, `MaternityPaternity`, `Compassionate`, `Emergency`, `Unpaid` |
-| `LeaveStatus` | `Pending`, `Approved`, `Rejected` |
-| `SwapStatus` | `PendingRequestee`, `PendingAdmin`, `Approved`, `Rejected`, `Cancelled` |
+| Enum             | Values                                                                         |
+| ---------------- | ------------------------------------------------------------------------------ |
+| `StaffRole`      | `Admin`, `DepartmentLead`, `ChargeNurse`, `Doctor`, `Nurse`, `Receptionist`    |
+| `EmploymentType` | `FullTime`, `PartTime`, `Contract`                                             |
+| `ShiftType`      | `Morning`, `Afternoon`, `Night`                                                |
+| `LeaveType`      | `Annual`, `Sick`, `MaternityPaternity`, `Compassionate`, `Emergency`, `Unpaid` |
+| `LeaveStatus`    | `Pending`, `Approved`, `Rejected`                                              |
+| `SwapStatus`     | `PendingRequestee`, `PendingAdmin`, `Approved`, `Rejected`, `Cancelled`        |
 
 ---
 
-## 6. Role Permissions
+## 7. Role Permissions
 
 ### Feature Access Matrix
 
-| Feature | Admin | Dept Lead | Charge Nurse | Doctor | Nurse | Receptionist |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Dashboard (stats + today's shifts) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Dashboard (pending leaves panel) | ✓ | ✓ | — | — | — | — |
-| Schedule — view | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Schedule — create / edit / delete shifts | ✓ | ✓ | — | — | — | — |
-| Leave requests — submit | — | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Leave requests — review (approve / reject) | ✓ | ✓ | ✓ | — | — | — |
-| Leave requests — view all | ✓ | ✓ | ✓ | own only | own only | own only |
-| Shift swaps — request | — | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Shift swaps — respond (as requestee) | — | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Shift swaps — review (admin approval) | ✓ | ✓ | ✓ | — | — | — |
-| Staff management — view all | ✓ | ✓ | — | — | — | — |
-| Staff management — create / edit | ✓ | — | — | — | — | — |
-| Staff management — deactivate / reset password | ✓ | — | — | — | — | — |
-| Overtime tracker | ✓ | ✓ | ✓ | — | — | — |
-| Audit log | ✓ | — | — | — | — | — |
-| Profile (view + change password) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Feature                                        | Admin | Dept Lead | Charge Nurse |  Doctor  |  Nurse   | Receptionist |
+| ---------------------------------------------- | :---: | :-------: | :----------: | :------: | :------: | :----------: |
+| Dashboard (stats + today's shifts)             |   ✓   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
+| Dashboard (pending leaves panel)               |   ✓   |     ✓     |      —       |    —     |    —     |      —       |
+| Schedule — view                                |   ✓   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
+| Schedule — create / edit / delete shifts       |   ✓   |     ✓     |      —       |    —     |    —     |      —       |
+| Leave requests — submit                        |   —   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
+| Leave requests — review (approve / reject)     |   ✓   |     ✓     |      ✓       |    —     |    —     |      —       |
+| Leave requests — view all                      |   ✓   |     ✓     |      ✓       | own only | own only |   own only   |
+| Shift swaps — request                          |   —   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
+| Shift swaps — respond (as requestee)           |   —   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
+| Shift swaps — review (admin approval)          |   ✓   |     ✓     |      ✓       |    —     |    —     |      —       |
+| Staff management — view all                    |   ✓   |     ✓     |      —       |    —     |    —     |      —       |
+| Staff management — create / edit               |   ✓   |     —     |      —       |    —     |    —     |      —       |
+| Staff management — deactivate / reset password |   ✓   |     —     |      —       |    —     |    —     |      —       |
+| Overtime tracker                               |   ✓   |     ✓     |      ✓       |    —     |    —     |      —       |
+| Audit log                                      |   ✓   |     —     |      —       |    —     |    —     |      —       |
+| Profile (view + change password)               |   ✓   |     ✓     |      ✓       |    ✓     |    ✓     |      ✓       |
 
 ### Notes
 
@@ -239,7 +282,7 @@ RefreshToken
 
 ---
 
-## 7. Feature Modules
+## 8. Feature Modules
 
 ### Dashboard
 
@@ -295,7 +338,7 @@ RefreshToken
 
 ---
 
-## 8. Approval Workflows
+## 9. Approval Workflows
 
 ### Leave Request Flow
 
@@ -337,14 +380,14 @@ Requester proposes swap
 
 ---
 
-## 9. Authentication & Security
+## 10. Authentication & Security
 
 ### Token Strategy
 
-| Token | Storage | Lifetime | Purpose |
-|---|---|---|---|
+| Token            | Storage                   | Lifetime    | Purpose                                                       |
+| ---------------- | ------------------------- | ----------- | ------------------------------------------------------------- |
 | JWT Access Token | Redux store (memory only) | Short-lived | Authenticates API requests via `Authorization: Bearer` header |
-| Refresh Token | httpOnly cookie | Long-lived | Silently renews the access token without re-login |
+| Refresh Token    | httpOnly cookie           | Long-lived  | Silently renews the access token without re-login             |
 
 ### Flow
 
@@ -364,113 +407,116 @@ Passwords are hashed using a salted bcrypt-compatible hasher. Minimum password l
 
 ---
 
-## 10. Real-Time Notifications
+## 11. Real-Time Notifications
 
 All real-time communication uses a single `ScheduleHub` at `/hubs/schedule`.
 
 ### SignalR Groups
 
-| Group name | Who joins | Purpose |
-|---|---|---|
-| `dept:{name}` | All users (on connect) | Receive schedule change events for their department |
-| `user:{staffId}` | Each user individually | Receive personal notifications |
-| `role:reviewer` | Admin, DeptLead, ChargeNurse | Receive events requiring review action |
+| Group name       | Who joins                    | Purpose                                             |
+| ---------------- | ---------------------------- | --------------------------------------------------- |
+| `dept:{name}`    | All users (on connect)       | Receive schedule change events for their department |
+| `user:{staffId}` | Each user individually       | Receive personal notifications                      |
+| `role:reviewer`  | Admin, DeptLead, ChargeNurse | Receive events requiring review action              |
 
 ### Event Reference
 
-| Event | Sender group | Receiver group | Frontend effect |
-|---|---|---|---|
-| `ShiftCreated` | ShiftsController | `dept:{name}` | Invalidate Shift cache (schedule refreshes silently) |
-| `ShiftUpdated` | ShiftsController | `dept:{name}` | Invalidate Shift cache |
-| `ShiftDeleted` | ShiftsController | `dept:{name}` | Invalidate Shift cache |
-| `LeaveSubmitted` | LeavesController | `role:reviewer` | Invalidate Leave cache + bell notification |
-| `LeaveReviewed` | LeavesController | `user:{staffId}` | Invalidate Leave cache + bell notification |
-| `SwapRequested` | SwapsController | `user:{requesteeId}` | Invalidate Swap cache + bell notification |
-| `SwapResponded` (accepted) | SwapsController | `role:reviewer` | Invalidate Swap cache + bell notification |
-| `SwapReviewed` | SwapsController | `user:{requesterId}` + `user:{requesteeId}` | Invalidate Swap cache + bell notification |
+| Event                      | Sender group     | Receiver group                              | Frontend effect                                      |
+| -------------------------- | ---------------- | ------------------------------------------- | ---------------------------------------------------- |
+| `ShiftCreated`             | ShiftsController | `dept:{name}`                               | Invalidate Shift cache (schedule refreshes silently) |
+| `ShiftUpdated`             | ShiftsController | `dept:{name}`                               | Invalidate Shift cache                               |
+| `ShiftDeleted`             | ShiftsController | `dept:{name}`                               | Invalidate Shift cache                               |
+| `ShiftAssigned`            | ShiftsController | `user:{staffId}`                            | Bell notification — new shift assigned               |
+| `ShiftRescheduled`         | ShiftsController | `user:{staffId}`                            | Bell notification — shift date changed               |
+| `ShiftRemoved`             | ShiftsController | `user:{staffId}`                            | Bell notification — shift removed                    |
+| `LeaveSubmitted`           | LeavesController | `role:reviewer`                             | Invalidate Leave cache + bell notification           |
+| `LeaveReviewed`            | LeavesController | `user:{staffId}`                            | Invalidate Leave cache + bell notification           |
+| `SwapRequested`            | SwapsController  | `user:{requesteeId}`                        | Invalidate Swap cache + bell notification            |
+| `SwapResponded` (accepted) | SwapsController  | `role:reviewer`                             | Invalidate Swap cache + bell notification            |
+| `SwapReviewed`             | SwapsController  | `user:{requesterId}` + `user:{requesteeId}` | Invalidate Swap cache + bell notification            |
 
 The notification bell in the top bar shows an unread badge count. Clicking it opens a dropdown with the last 20 notifications (colour-coded by type: info / success / warning). Notifications are in-memory only and reset on page reload.
 
 ---
 
-## 11. API Reference
+## 12. API Reference
 
 All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` require a valid JWT Bearer token.
 
 ### Auth
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/auth/login` | Public | Authenticate and receive tokens |
-| `POST` | `/auth/refresh` | Cookie | Renew access token using refresh cookie |
-| `POST` | `/auth/logout` | Authenticated | Revoke refresh token |
+| Method | Endpoint        | Access        | Description                             |
+| ------ | --------------- | ------------- | --------------------------------------- |
+| `POST` | `/auth/login`   | Public        | Authenticate and receive tokens         |
+| `POST` | `/auth/refresh` | Cookie        | Renew access token using refresh cookie |
+| `POST` | `/auth/logout`  | Authenticated | Revoke refresh token                    |
 
 ### Dashboard
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/dashboard/stats` | All | Stat card counts |
-| `GET` | `/dashboard/today-shifts` | All | Today's scheduled shifts |
-| `GET` | `/dashboard/pending-leaves` | Reviewer | Pending leave request list |
+| Method | Endpoint                    | Access   | Description                |
+| ------ | --------------------------- | -------- | -------------------------- |
+| `GET`  | `/dashboard/stats`          | All      | Stat card counts           |
+| `GET`  | `/dashboard/today-shifts`   | All      | Today's scheduled shifts   |
+| `GET`  | `/dashboard/pending-leaves` | Reviewer | Pending leave request list |
 
 ### Shifts
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/shifts` | All | Weekly or monthly shift grid |
-| `GET` | `/shifts/upcoming` | All | Upcoming shifts for a staff member |
-| `POST` | `/shifts` | Admin, DeptLead | Create a shift |
-| `PATCH` | `/shifts/{id}` | Admin, DeptLead | Reschedule a shift |
-| `DELETE` | `/shifts/{id}` | Admin, DeptLead | Delete a shift |
+| Method   | Endpoint           | Access          | Description                        |
+| -------- | ------------------ | --------------- | ---------------------------------- |
+| `GET`    | `/shifts`          | All             | Weekly or monthly shift grid       |
+| `GET`    | `/shifts/upcoming` | All             | Upcoming shifts for a staff member |
+| `POST`   | `/shifts`          | Admin, DeptLead | Create a shift                     |
+| `PATCH`  | `/shifts/{id}`     | Admin, DeptLead | Reschedule a shift                 |
+| `DELETE` | `/shifts/{id}`     | Admin, DeptLead | Delete a shift                     |
 
 ### Leaves
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/leaves` | All | Scoped leave request list |
-| `GET` | `/leaves/approved` | All | Approved leaves for a date range |
-| `POST` | `/leaves` | Non-Admin | Submit a leave request |
-| `PUT` | `/leaves/{id}/review` | Reviewer | Approve or reject a request |
-| `DELETE` | `/leaves/{id}` | Owner | Cancel own pending request |
+| Method   | Endpoint              | Access    | Description                      |
+| -------- | --------------------- | --------- | -------------------------------- |
+| `GET`    | `/leaves`             | All       | Scoped leave request list        |
+| `GET`    | `/leaves/approved`    | All       | Approved leaves for a date range |
+| `POST`   | `/leaves`             | Non-Admin | Submit a leave request           |
+| `PUT`    | `/leaves/{id}/review` | Reviewer  | Approve or reject a request      |
+| `DELETE` | `/leaves/{id}`        | Owner     | Cancel own pending request       |
 
 ### Swaps
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/swaps` | All | Scoped swap request list |
-| `POST` | `/swaps` | Non-Admin | Submit a swap request |
-| `PUT` | `/swaps/{id}/respond` | Requestee | Accept or decline as requestee |
-| `PUT` | `/swaps/{id}/review` | Reviewer | Approve or reject as admin |
-| `DELETE` | `/swaps/{id}` | Owner | Cancel own pending request |
+| Method   | Endpoint              | Access    | Description                    |
+| -------- | --------------------- | --------- | ------------------------------ |
+| `GET`    | `/swaps`              | All       | Scoped swap request list       |
+| `POST`   | `/swaps`              | Non-Admin | Submit a swap request          |
+| `PUT`    | `/swaps/{id}/respond` | Requestee | Accept or decline as requestee |
+| `PUT`    | `/swaps/{id}/review`  | Reviewer  | Approve or reject as admin     |
+| `DELETE` | `/swaps/{id}`         | Owner     | Cancel own pending request     |
 
 ### Staff & Departments
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/staff/management` | Admin, DeptLead | Full staff list including inactive |
-| `POST` | `/staff` | Admin | Create staff account |
-| `PUT` | `/staff/{id}` | Admin | Update staff profile |
-| `PATCH` | `/staff/{id}/toggle-active` | Admin | Activate or deactivate account |
-| `POST` | `/staff/{id}/reset-password` | Admin | Reset staff password |
-| `GET` | `/departments` | Authenticated | List all departments |
+| Method  | Endpoint                     | Access          | Description                        |
+| ------- | ---------------------------- | --------------- | ---------------------------------- |
+| `GET`   | `/staff/management`          | Admin, DeptLead | Full staff list including inactive |
+| `POST`  | `/staff`                     | Admin           | Create staff account               |
+| `PUT`   | `/staff/{id}`                | Admin           | Update staff profile               |
+| `PATCH` | `/staff/{id}/toggle-active`  | Admin           | Activate or deactivate account     |
+| `POST`  | `/staff/{id}/reset-password` | Admin           | Reset staff password               |
+| `GET`   | `/departments`               | Authenticated   | List all departments               |
 
 ### Overtime & Audit
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/overtime` | Admin, DeptLead, ChargeNurse | Weekly overtime report (`?from=&to=`) |
-| `GET` | `/audit` | Admin | Audit timeline (`?from=&to=&category=`) |
+| Method | Endpoint    | Access                       | Description                             |
+| ------ | ----------- | ---------------------------- | --------------------------------------- |
+| `GET`  | `/overtime` | Admin, DeptLead, ChargeNurse | Weekly overtime report (`?from=&to=`)   |
+| `GET`  | `/audit`    | Admin                        | Audit timeline (`?from=&to=&category=`) |
 
 ### Profile
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/profile` | Authenticated | Get own profile |
-| `PUT` | `/profile/password` | Authenticated | Change own password |
+| Method | Endpoint            | Access        | Description         |
+| ------ | ------------------- | ------------- | ------------------- |
+| `GET`  | `/profile`          | Authenticated | Get own profile     |
+| `PUT`  | `/profile/password` | Authenticated | Change own password |
 
 ---
 
-## 12. Getting Started
+## 13. Getting Started
 
 ### Prerequisites
 
@@ -484,14 +530,14 @@ Create a PostgreSQL database and update the connection string in `app/ClinicalSc
 
 ```json
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=careshift;Username=postgres;Password=yourpassword"
-  },
-  "JwtSettings": {
-    "SecretKey": "your-secret-key-min-32-chars",
-    "Issuer": "CareShift",
-    "Audience": "CareShiftUsers"
-  }
+    "ConnectionStrings": {
+        "DefaultConnection": "Host=localhost;Database=careshift;Username=postgres;Password=yourpassword"
+    },
+    "JwtSettings": {
+        "SecretKey": "your-secret-key-min-32-chars",
+        "Issuer": "CareShift",
+        "Audience": "CareShiftUsers"
+    }
 }
 ```
 
@@ -519,13 +565,14 @@ The UI is available at `http://localhost:5173`. The Vite dev server proxies `/ap
 
 ### Default Seed Accounts
 
-| Role | Email | Password |
-|---|---|---|
-| Admin | admin@careshift.com | Admin123! |
-| Department Lead | lead@careshift.com | Lead123! |
-| Charge Nurse | charge@careshift.com | Charge123! |
-| Doctor | doctor@careshift.com | Doctor123! |
-| Nurse | nurse@careshift.com | Nurse123! |
+| Role            | Email                 | Password    |
+| --------------- | --------------------- | ----------- |
+| Admin           | admin@hospital.org    | admin123    |
+| Department Lead | m.kim@hospital.org    | password123 |
+| Charge Nurse    | d.foster@hospital.org | password123 |
+| Doctor          | s.chen@hospital.org   | password123 |
+| Nurse           | e.white@hospital.org  | password123 |
+| Receptionist    | l.wong@hospital.org   | password123 |
 
 > **Note:** Change all default passwords after first login in a production environment.
 
@@ -543,6 +590,6 @@ dotnet publish -c Release
 
 The frontend `dist/` folder can be served as static files from the .NET host or a separate CDN. Update the CORS policy in `Program.cs` with the production frontend origin before deploying.
 
-## 13. License
+## 14. License
 
 This project is licensed under the [MIT License](LICENSE).
