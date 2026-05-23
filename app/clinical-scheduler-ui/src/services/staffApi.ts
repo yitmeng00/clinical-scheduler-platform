@@ -37,8 +37,15 @@ export const staffApi = api.injectEndpoints({
       invalidatesTags: ["Staff"],
     }),
 
-    updateStaff: builder.mutation<StaffMember, { id: number } & UpdateStaffBody>({
-      query: ({ id, ...body }) => ({ url: `/staff/${id}`, method: "PUT", body }),
+    updateStaff: builder.mutation<
+      StaffMember,
+      { id: number } & UpdateStaffBody
+    >({
+      query: ({ id, ...body }) => ({
+        url: `/staff/${id}`,
+        method: "PUT",
+        body,
+      }),
       invalidatesTags: ["Staff"],
     }),
 
@@ -47,7 +54,10 @@ export const staffApi = api.injectEndpoints({
       invalidatesTags: ["Staff"],
     }),
 
-    resetStaffPassword: builder.mutation<void, { id: number; newPassword: string }>({
+    resetStaffPassword: builder.mutation<
+      void,
+      { id: number; newPassword: string }
+    >({
       query: ({ id, newPassword }) => ({
         url: `/staff/${id}/reset-password`,
         method: "POST",

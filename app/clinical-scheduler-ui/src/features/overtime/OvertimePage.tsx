@@ -184,7 +184,9 @@ export default function OvertimePage() {
                         {r.initials}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-800">{r.fullName}</p>
+                        <p className="font-medium text-slate-800">
+                          {r.fullName}
+                        </p>
                         <p className="text-xs text-slate-400">
                           {ROLE_LABELS[r.role] ?? r.role}
                         </p>
@@ -200,8 +202,12 @@ export default function OvertimePage() {
                   <td className="px-3 py-3.5 text-slate-700 font-medium">
                     {r.shiftCount}
                   </td>
-                  <td className="px-3 py-3.5 text-slate-700">{r.totalHours}h</td>
-                  <td className="px-3 py-3.5 text-slate-500">{r.regularHours}h</td>
+                  <td className="px-3 py-3.5 text-slate-700">
+                    {r.totalHours}h
+                  </td>
+                  <td className="px-3 py-3.5 text-slate-500">
+                    {r.regularHours}h
+                  </td>
                   <td className="px-3 py-3.5">
                     {r.isOvertime ? (
                       <span className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">
