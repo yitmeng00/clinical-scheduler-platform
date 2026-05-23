@@ -39,6 +39,7 @@ public class ShiftsController(IMediator mediator, IHubContext<ScheduleHub> hub) 
     {
         var dto = await mediator.Send(command, ct);
         await hub.Clients.Group($"dept:{dto.DepartmentName}").SendAsync("ShiftCreated", dto, ct);
+        await hub.Clients.Group($"user:{dto.StaffId}").SendAsync("ShiftAssigned", new { shiftType = dto.ShiftType, startTime = dto.StartTime }, ct);
         return CreatedAtAction(nameof(GetByWeek), new { weekStart = DateOnly.FromDateTime(dto.StartTime) }, dto);
     }
 
@@ -48,6 +49,7 @@ public class ShiftsController(IMediator mediator, IHubContext<ScheduleHub> hub) 
     {
         var dto = await mediator.Send(new UpdateShiftCommand(id, request.NewDate), ct);
         await hub.Clients.Group($"dept:{dto.DepartmentName}").SendAsync("ShiftUpdated", dto, ct);
+        await hub.Clients.Group($"user:{dto.StaffId}").SendAsync("ShiftRescheduled", new { shiftType = dto.ShiftType, startTime = dto.StartTime }, ct);
         return Ok(dto);
     }
 
@@ -56,7 +58,8 @@ public class ShiftsController(IMediator mediator, IHubContext<ScheduleHub> hub) 
     public async Task<IActionResult> Delete(int id, CancellationToken ct)
     {
         var info = await mediator.Send(new DeleteShiftCommand(id), ct);
-        await hub.Clients.Group($"dept:{info.DepartmentName}").SendAsync("ShiftDeleted", new { id }, ct);
+        await hub.Clients.Group($"dept:{info.DepartmentName}").SendAsync("ShiftDeleted", new { id, staffId = info.StaffId }, ct);
+        await hub.Clients.Group($"user:{info.StaffId}").SendAsync("ShiftRemoved", new { }, ct);
         return NoContent();
     }
 }
