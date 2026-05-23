@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { LogOut, X } from "lucide-react";
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -9,6 +10,7 @@ import {
   selectPendingCount,
   useGetLeaveRequestsQuery,
 } from "../../features/leaves/leavesApi";
+import ProfilePanel from "../../features/profile/ProfilePanel";
 import {
   selectSwapPendingCount,
   useGetSwapRequestsQuery,
@@ -50,6 +52,7 @@ function SidebarContent({ onNavClick }: SidebarContentProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   if (!user) return null;
 
@@ -103,17 +106,23 @@ function SidebarContent({ onNavClick }: SidebarContentProps) {
       {/* User info + logout */}
       <div className="p-4 border-t border-t-slate-200">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 bg-accent/10 text-accent">
-            {user.initials}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-semibold text-slate-900 truncate">
-              {user.fullName}
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-2.5 flex-1 min-w-0 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer text-left p-1 -m-1"
+            title="View profile"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 bg-accent/10 text-accent">
+              {user.initials}
             </div>
-            <div className="text-xs text-slate-400 capitalize">
-              {ROLE_LABELS[user.role as StaffRole]}
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-semibold text-slate-900 truncate">
+                {user.fullName}
+              </div>
+              <div className="text-xs text-slate-400 capitalize">
+                {ROLE_LABELS[user.role as StaffRole]}
+              </div>
             </div>
-          </div>
+          </button>
           <button
             onClick={handleLogout}
             title="Sign out"
@@ -123,6 +132,8 @@ function SidebarContent({ onNavClick }: SidebarContentProps) {
           </button>
         </div>
       </div>
+
+      {profileOpen && <ProfilePanel onClose={() => setProfileOpen(false)} />}
     </>
   );
 }
