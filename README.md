@@ -18,6 +18,7 @@ A full-stack responsive application for managing clinical staff schedules, leave
 10. [Real-Time Notifications](#10-real-time-notifications)
 11. [API Reference](#11-api-reference)
 12. [Getting Started](#12-getting-started)
+13. [License](#13-license)
 
 ---
 
@@ -541,3 +542,7 @@ dotnet publish -c Release
 ```
 
 The frontend `dist/` folder can be served as static files from the .NET host or a separate CDN. Update the CORS policy in `Program.cs` with the production frontend origin before deploying.
+
+## 13. License
+
+This project is licensed under the [MIT License](LICENSE).
