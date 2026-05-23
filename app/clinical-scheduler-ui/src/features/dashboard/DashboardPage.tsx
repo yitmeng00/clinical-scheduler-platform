@@ -1,12 +1,3 @@
-import {
-  AlertTriangle,
-  CalendarCheck,
-  ClipboardClock,
-  Users,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-
-import OvertimeAlertsPanel from "./components/OvertimeAlertsPanel";
 import PendingLeavesPanel from "./components/PendingLeavesPanel";
 import StatCard from "./components/StatCard";
 import type { StatCardVariant } from "./components/StatCard";
@@ -25,7 +16,7 @@ interface StatCardConfig {
   label: string;
   sub: string;
   variant: StatCardVariant;
-  icon: LucideIcon;
+  to: string;
 }
 
 const STAT_CARD_CONFIGS: StatCardConfig[] = [
@@ -34,28 +25,28 @@ const STAT_CARD_CONFIGS: StatCardConfig[] = [
     label: "On Duty Today",
     sub: "shifts scheduled",
     variant: "blue",
-    icon: CalendarCheck,
+    to: "/schedule",
   },
   {
     key: "pendingLeaves",
     label: "Pending Leave",
     sub: "awaiting review",
     variant: "amber",
-    icon: ClipboardClock,
+    to: "/leaves",
   },
   {
     key: "overtimeAlerts",
     label: "Overtime Alerts",
     sub: "over 40 hrs this week",
     variant: "red",
-    icon: AlertTriangle,
+    to: "/overtime",
   },
   {
     key: "activeStaff",
     label: "Active Staff",
     sub: "across departments",
     variant: "green",
-    icon: Users,
+    to: "/staff",
   },
 ];
 
@@ -64,8 +55,6 @@ const LEAVE_REVIEWER_ROLES = new Set(["Admin", "DepartmentLead"]);
 export default function DashboardPage() {
   const user = useAppSelector((state) => state.auth.user);
   const canReviewLeave = user ? LEAVE_REVIEWER_ROLES.has(user.role) : false;
-  const canSeeOvertime =
-    user?.role === "Admin" || user?.role === "DepartmentLead";
 
   const { data: stats, isLoading: statsLoading } = useGetDashboardStatsQuery();
   const { data: todayShifts, isLoading: shiftsLoading } =
@@ -91,7 +80,7 @@ export default function DashboardPage() {
             label={config.label}
             sub={config.sub}
             variant={config.variant}
-            icon={config.icon}
+            to={config.to}
             value={stats?.[config.key] ?? "—"}
             isLoading={statsLoading}
           />
@@ -99,32 +88,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Detail panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Today's shifts — full-width on its own row, spans 2 cols when others present */}
-        <div
-          className={
-            canReviewLeave || canSeeOvertime ? "lg:col-span-2" : "lg:col-span-3"
-          }
-        >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+        <div className={canReviewLeave ? "lg:col-span-2" : "lg:col-span-3"}>
           <TodayShiftsPanel shifts={todayShifts} isLoading={shiftsLoading} />
         </div>
-
-        {/* Right column: role-gated panels */}
-        {(canReviewLeave || canSeeOvertime) && (
-          <div className="flex flex-col gap-4">
-            {canReviewLeave && (
-              <PendingLeavesPanel
-                leaves={pendingLeaves}
-                isLoading={leavesLoading}
-              />
-            )}
-            {canSeeOvertime && (
-              <OvertimeAlertsPanel
-                count={stats?.overtimeAlerts ?? 0}
-                isLoading={statsLoading}
-              />
-            )}
-          </div>
+        {canReviewLeave && (
+          <PendingLeavesPanel
+            leaves={pendingLeaves}
+            isLoading={leavesLoading}
+          />
         )}
       </div>
     </div>
