@@ -1,3 +1,4 @@
+import type { HubConnection } from "@microsoft/signalr";
 import { useEffect } from "react";
 
 import { startScheduleHub, stopScheduleHub } from "./scheduleHubConnection";
@@ -19,18 +20,32 @@ export function useSignalR() {
 
     let cancelled = false;
 
+    const joinGroups = async (hub: HubConnection) => {
+      await hub.invoke("JoinUserGroup", String(user.id));
+      if (REVIEWER_ROLES.has(user.role)) {
+        await hub.invoke("JoinReviewerGroup");
+      }
+      await hub.invoke("JoinDepartment", user.department);
+    };
+
     const connect = async () => {
       try {
         const hub = await startScheduleHub(getToken);
         if (cancelled) return;
 
-        await hub.invoke("JoinUserGroup", String(user.id));
-        if (REVIEWER_ROLES.has(user.role)) {
-          await hub.invoke("JoinReviewerGroup");
-        }
-        await hub.invoke("JoinDepartment", user.department);
+        await joinGroups(hub);
 
-        // Live schedule updates — invalidate RTK Query cache so all views refresh
+        // Re-join groups after automatic reconnect — server drops all group
+        // memberships when a connection drops and gets a new connection ID.
+        hub.onreconnected(async () => {
+          try {
+            await joinGroups(hub);
+          } catch {
+            // ignore — will retry on next reconnect
+          }
+        });
+
+        // Shift broadcast events — invalidate cache for the whole department
         hub.on("ShiftCreated", () =>
           dispatch(api.util.invalidateTags(["Shift"])),
         );
@@ -40,6 +55,52 @@ export function useSignalR() {
         hub.on("ShiftDeleted", () =>
           dispatch(api.util.invalidateTags(["Shift"])),
         );
+
+        // Targeted shift events — personal notifications for the assigned staff member
+        hub.on(
+          "ShiftAssigned",
+          (payload: { shiftType: string; startTime: string }) => {
+            const date = new Date(payload.startTime).toLocaleDateString(
+              "en-US",
+              {
+                month: "short",
+                day: "numeric",
+              },
+            );
+            dispatch(
+              addNotification({
+                message: `A new ${payload.shiftType} shift has been assigned to you on ${date}`,
+                type: "info",
+              }),
+            );
+          },
+        );
+        hub.on(
+          "ShiftRescheduled",
+          (payload: { shiftType: string; startTime: string }) => {
+            const date = new Date(payload.startTime).toLocaleDateString(
+              "en-US",
+              {
+                month: "short",
+                day: "numeric",
+              },
+            );
+            dispatch(
+              addNotification({
+                message: `Your ${payload.shiftType} shift has been rescheduled to ${date}`,
+                type: "info",
+              }),
+            );
+          },
+        );
+        hub.on("ShiftRemoved", () => {
+          dispatch(
+            addNotification({
+              message: "One of your scheduled shifts has been removed",
+              type: "warning",
+            }),
+          );
+        });
 
         // Leave events
         hub.on(
@@ -103,14 +164,31 @@ export function useSignalR() {
           },
         );
       } catch {
-        // withAutomaticReconnect handles retries
+        // Connection failed — likely no token yet (post-refresh page load).
+        // The store subscriber below will retry once the token arrives.
       }
     };
 
-    connect();
+    // If a valid token is already in the store, connect immediately.
+    // Otherwise wait for the /auth/refresh cycle to complete and set the token.
+    if (store.getState().auth.token) {
+      connect();
+      return () => {
+        cancelled = true;
+        stopScheduleHub();
+      };
+    }
+
+    const unsubscribe = store.subscribe(() => {
+      if (store.getState().auth.token) {
+        unsubscribe();
+        if (!cancelled) connect();
+      }
+    });
 
     return () => {
       cancelled = true;
+      unsubscribe();
       stopScheduleHub();
     };
   }, [user?.id, dispatch]);

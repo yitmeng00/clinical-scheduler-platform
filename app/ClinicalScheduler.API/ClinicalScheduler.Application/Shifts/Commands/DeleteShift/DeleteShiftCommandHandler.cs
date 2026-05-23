@@ -16,7 +16,7 @@ public class DeleteShiftCommandHandler(IApplicationDbContext context)
             .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Shift), request.Id);
 
-        var info = new DeletedShiftInfo(shift.Id, shift.Department.Name);
+        var info = new DeletedShiftInfo(shift.Id, shift.StaffId, shift.Department.Name);
 
         context.Shifts.Remove(shift);
         await context.SaveChangesAsync(cancellationToken);
