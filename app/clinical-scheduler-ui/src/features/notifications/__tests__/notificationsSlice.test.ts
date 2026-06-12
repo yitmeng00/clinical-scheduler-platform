@@ -5,7 +5,8 @@ import notificationsReducer, {
   markAllRead,
 } from "../notificationsSlice";
 
-const empty = { items: [] };
+import type { AppNotification } from "../notificationsSlice";
+const empty: { items: AppNotification[] } = { items: [] };
 
 describe("notificationsSlice", () => {
   describe("addNotification", () => {
