@@ -9,34 +9,44 @@ import {
   mockTodayShifts,
 } from "./fixtures";
 
+// MSW v2 node mode (setupServer) requires absolute URLs — relative paths like
+// "/api/v1/..." won't match requests to "http://localhost/api/v1/...".
+const BASE = "http://localhost";
+
 export const handlers = [
   // Auth
-  http.post("/api/v1/auth/login", () => HttpResponse.json(mockLoginResponse)),
+  http.post(`${BASE}/api/v1/auth/login`, () =>
+    HttpResponse.json(mockLoginResponse),
+  ),
   http.post(
-    "/api/v1/auth/logout",
+    `${BASE}/api/v1/auth/logout`,
     () => new HttpResponse(null, { status: 204 }),
   ),
-  http.post("/api/v1/auth/refresh", () => HttpResponse.json(mockLoginResponse)),
+  http.post(`${BASE}/api/v1/auth/refresh`, () =>
+    HttpResponse.json(mockLoginResponse),
+  ),
 
   // Dashboard
-  http.get("/api/v1/dashboard/stats", () =>
+  http.get(`${BASE}/api/v1/dashboard/stats`, () =>
     HttpResponse.json(mockDashboardStats),
   ),
-  http.get("/api/v1/dashboard/today-shifts", () =>
+  http.get(`${BASE}/api/v1/dashboard/today-shifts`, () =>
     HttpResponse.json(mockTodayShifts),
   ),
-  http.get("/api/v1/dashboard/pending-leaves", () =>
+  http.get(`${BASE}/api/v1/dashboard/pending-leaves`, () =>
     HttpResponse.json(mockPendingLeaves),
   ),
 
   // Departments
-  http.get("/api/v1/departments", () => HttpResponse.json(mockDepartments)),
+  http.get(`${BASE}/api/v1/departments`, () =>
+    HttpResponse.json(mockDepartments),
+  ),
 
   // Staff
-  http.get("/api/v1/staff", () => HttpResponse.json([])),
-  http.get("/api/v1/staff/management", () => HttpResponse.json([])),
-  http.post("/api/v1/staff", () =>
+  http.get(`${BASE}/api/v1/staff`, () => HttpResponse.json([])),
+  http.get(`${BASE}/api/v1/staff/management`, () => HttpResponse.json([])),
+  http.post(`${BASE}/api/v1/staff`, () =>
     HttpResponse.json(mockStaffMember, { status: 201 }),
   ),
-  http.put("/api/v1/staff/:id", () => HttpResponse.json(mockStaffMember)),
+  http.put(`${BASE}/api/v1/staff/:id`, () => HttpResponse.json(mockStaffMember)),
 ];
