@@ -23,22 +23,28 @@ test.describe("Notification bell", () => {
     page,
   }) => {
     // The bell is the only icon button in the top bar
-    await page.getByRole("button").first().click();
-    await expect(page.getByText("Notifications")).toBeVisible();
+    await page.getByRole("button", { name: "Notifications" }).click();
+    await expect(
+      page.getByText("Notifications", { exact: true }),
+    ).toBeVisible();
   });
 
   test("dropdown shows the empty state when there are no notifications", async ({
     page,
   }) => {
-    await page.getByRole("button").first().click();
+    await page.getByRole("button", { name: "Notifications" }).click();
     await expect(page.getByText("No notifications yet.")).toBeVisible();
   });
 
   test("clicking the backdrop closes the dropdown", async ({ page }) => {
-    await page.getByRole("button").first().click();
-    await expect(page.getByText("Notifications")).toBeVisible();
+    await page.getByRole("button", { name: "Notifications" }).click();
+    await expect(
+      page.getByText("Notifications", { exact: true }),
+    ).toBeVisible();
     // Click the fixed backdrop overlay
     await page.locator("div.fixed.inset-0").click({ force: true });
-    await expect(page.getByText("Notifications")).not.toBeVisible();
+    await expect(
+      page.getByText("Notifications", { exact: true }),
+    ).not.toBeVisible();
   });
 });

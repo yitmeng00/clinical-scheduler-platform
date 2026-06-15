@@ -64,6 +64,7 @@ function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={handleOpen}
+        aria-label="Notifications"
         className="relative w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
       >
         <Bell size={17} />

@@ -17,9 +17,7 @@ describe("loginSchema", () => {
       password: "password123",
     });
     expect(result.success).toBe(false);
-    expect(result.error?.issues[0].message).toBe(
-      "Enter a valid email address",
-    );
+    expect(result.error?.issues[0].message).toBe("Enter a valid email address");
   });
 
   it("rejects a password shorter than 6 characters", () => {

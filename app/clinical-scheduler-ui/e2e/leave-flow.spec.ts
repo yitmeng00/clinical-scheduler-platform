@@ -27,9 +27,7 @@ test.describe("Leave Requests page — staff member", () => {
   });
 
   test("shows the empty state when there are no leaves", async ({ page }) => {
-    await expect(
-      page.getByText("No leave requests."),
-    ).toBeVisible();
+    await expect(page.getByText("No leave requests.")).toBeVisible();
   });
 
   test("opens the Request Leave modal when the button is clicked", async ({
@@ -43,18 +41,19 @@ test.describe("Leave Requests page — staff member", () => {
 
   test("modal has the required form fields", async ({ page }) => {
     await page.getByRole("button", { name: "Request Leave" }).click();
-    await expect(page.getByLabel("Leave Type")).toBeVisible();
-    await expect(page.getByLabel("Start Date")).toBeVisible();
-    await expect(page.getByLabel("End Date")).toBeVisible();
-    await expect(page.getByLabel("Reason")).toBeVisible();
+    // FormField has no htmlFor association; use name attributes set by react-hook-form
+    await expect(page.locator('select[name="leaveType"]')).toBeVisible();
+    await expect(page.locator('input[name="startDate"]')).toBeVisible();
+    await expect(page.locator('input[name="endDate"]')).toBeVisible();
+    await expect(page.locator('textarea[name="reason"]')).toBeVisible();
   });
 
   test("shows validation errors when submitting an empty form", async ({
     page,
   }) => {
     await page.getByRole("button", { name: "Request Leave" }).click();
-    // Clear the pre-filled start date then try to submit
-    await page.getByLabel("Start Date").fill("");
+    // Clear the start date then submit to trigger validation
+    await page.locator('input[name="startDate"]').fill("");
     await page.getByRole("button", { name: "Submit Request" }).click();
     await expect(page.getByText("Start date is required")).toBeVisible();
   });
@@ -72,8 +71,8 @@ test.describe("Leave Requests page — staff member", () => {
     const dateStr = tomorrow.toISOString().slice(0, 10);
 
     await page.getByRole("button", { name: "Request Leave" }).click();
-    await page.getByLabel("Start Date").fill(dateStr);
-    await page.getByLabel("End Date").fill(dateStr);
+    await page.locator('input[name="startDate"]').fill(dateStr);
+    await page.locator('input[name="endDate"]').fill(dateStr);
     await page
       .getByPlaceholder("Briefly explain the reason for your leave…")
       .fill("Annual leave");
@@ -100,9 +99,7 @@ test.describe("Leave Requests page — Admin", () => {
     await page.goto("/leaves");
   });
 
-  test("does NOT show the Request Leave button for Admin", async ({
-    page,
-  }) => {
+  test("does NOT show the Request Leave button for Admin", async ({ page }) => {
     await expect(
       page.getByRole("button", { name: "Request Leave" }),
     ).not.toBeVisible();

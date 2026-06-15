@@ -2,10 +2,10 @@ import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import TopBar from "../TopBar";
+import type { AppNotification } from "../../../features/notifications/notificationsSlice";
 import { mockUser } from "../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../test/utils/renderWithProviders";
-import type { AppNotification } from "../../../features/notifications/notificationsSlice";
+import TopBar from "../TopBar";
 
 function makeNotification(
   overrides: Partial<AppNotification> = {},
@@ -53,7 +53,10 @@ describe("NotificationBell", () => {
       user: mockUser,
       preloadedState: {
         notifications: {
-          items: [makeNotification({ read: true }), makeNotification({ read: true })],
+          items: [
+            makeNotification({ read: true }),
+            makeNotification({ read: true }),
+          ],
         },
       },
     });
@@ -63,14 +66,14 @@ describe("NotificationBell", () => {
   it("opens the dropdown when the bell is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<TopBar />, { user: mockUser });
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     expect(screen.getByText("Notifications")).toBeInTheDocument();
   });
 
   it("shows the empty state message when there are no notifications", async () => {
     const user = userEvent.setup();
     renderWithProviders(<TopBar />, { user: mockUser });
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     expect(screen.getByText("No notifications yet.")).toBeInTheDocument();
   });
 
@@ -84,7 +87,7 @@ describe("NotificationBell", () => {
         },
       },
     });
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     expect(screen.getByText("Your shift was assigned")).toBeInTheDocument();
   });
 
@@ -96,10 +99,10 @@ describe("NotificationBell", () => {
         notifications: { items: [makeNotification(), makeNotification()] },
       },
     });
-    await user.click(screen.getByRole("button"));
-    expect(
-      store.getState().notifications.items.every((n) => n.read),
-    ).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    expect(store.getState().notifications.items.every((n) => n.read)).toBe(
+      true,
+    );
   });
 
   it("hides the badge after opening the bell", async () => {
@@ -112,7 +115,7 @@ describe("NotificationBell", () => {
     });
     // Badge visible before click
     expect(screen.getByText("1")).toBeInTheDocument();
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     // Badge gone after click (all marked read)
     expect(screen.queryByText("1")).not.toBeInTheDocument();
   });
@@ -120,7 +123,7 @@ describe("NotificationBell", () => {
   it("closes the dropdown when the backdrop is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<TopBar />, { user: mockUser });
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     expect(screen.getByText("Notifications")).toBeInTheDocument();
     // Click the fixed backdrop overlay
     await user.click(document.querySelector("div.fixed.inset-0")!);
@@ -135,7 +138,7 @@ describe("NotificationBell", () => {
         notifications: { items: [makeNotification({ read: true })] },
       },
     });
-    await user.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
     expect(screen.getByText("Mark all read")).toBeInTheDocument();
   });
 });

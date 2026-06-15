@@ -9,14 +9,10 @@ test.beforeEach(async ({ page }) => {
 test.describe("Login page", () => {
   test("renders the Sign in form", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.getByRole("heading", { name: "Sign in" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
     await expect(page.getByPlaceholder("you@hospital.org")).toBeVisible();
     await expect(page.getByPlaceholder("••••••••")).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "Sign in" }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
   });
 
   test("shows validation error when submitting an empty form", async ({
@@ -24,9 +20,7 @@ test.describe("Login page", () => {
   }) => {
     await page.goto("/");
     await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(
-      page.getByText("Enter a valid email address"),
-    ).toBeVisible();
+    await expect(page.getByText("Enter a valid email address")).toBeVisible();
   });
 
   test("shows a server error on invalid credentials", async ({ page }) => {
@@ -50,7 +44,7 @@ test.describe("Login page", () => {
 
   test("dashboard shows a greeting after login", async ({ page }) => {
     await loginAs(page);
-    await expect(page.getByText(/Mark/)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Mark/ })).toBeVisible();
   });
 });
 
