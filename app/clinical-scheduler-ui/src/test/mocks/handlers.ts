@@ -48,5 +48,52 @@ export const handlers = [
   http.post(`${BASE}/api/v1/staff`, () =>
     HttpResponse.json(mockStaffMember, { status: 201 }),
   ),
-  http.put(`${BASE}/api/v1/staff/:id`, () => HttpResponse.json(mockStaffMember)),
+  http.put(`${BASE}/api/v1/staff/:id`, () =>
+    HttpResponse.json(mockStaffMember),
+  ),
+  http.put(
+    `${BASE}/api/v1/staff/:id/password`,
+    () => new HttpResponse(null, { status: 204 }),
+  ),
+
+  // Leaves
+  http.get(`${BASE}/api/v1/leaves`, () => HttpResponse.json([])),
+  http.post(`${BASE}/api/v1/leaves`, () =>
+    HttpResponse.json({ id: 1 }, { status: 201 }),
+  ),
+  http.patch(`${BASE}/api/v1/leaves/:id/review`, () =>
+    HttpResponse.json({ id: 1 }),
+  ),
+
+  // Shifts / Schedule
+  http.get(`${BASE}/api/v1/shifts`, () => HttpResponse.json([])),
+  http.post(`${BASE}/api/v1/shifts`, () =>
+    HttpResponse.json({ id: 1 }, { status: 201 }),
+  ),
+  http.put(`${BASE}/api/v1/shifts/:id`, () => HttpResponse.json({ id: 1 })),
+  http.delete(
+    `${BASE}/api/v1/shifts/:id`,
+    () => new HttpResponse(null, { status: 204 }),
+  ),
+
+  // Swaps
+  http.get(`${BASE}/api/v1/swaps`, () => HttpResponse.json([])),
+  http.post(`${BASE}/api/v1/swaps`, () =>
+    HttpResponse.json({ id: 1 }, { status: 201 }),
+  ),
+  http.patch(`${BASE}/api/v1/swaps/:id/review`, () =>
+    HttpResponse.json({ id: 1 }),
+  ),
+
+  // Overtime
+  http.get(`${BASE}/api/v1/overtime`, () => HttpResponse.json([])),
+
+  // Audit
+  http.get(`${BASE}/api/v1/audit`, () =>
+    HttpResponse.json({ items: [], totalCount: 0, page: 1, pageSize: 20 }),
+  ),
+
+  // Profile
+  http.get(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockStaffMember)),
+  http.put(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockStaffMember)),
 ];
