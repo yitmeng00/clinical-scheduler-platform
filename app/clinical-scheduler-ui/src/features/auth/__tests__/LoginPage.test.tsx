@@ -1,11 +1,11 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
-import LoginPage from "../LoginPage";
-import { renderWithProviders } from "../../../test/utils/renderWithProviders";
 import { server } from "../../../test/mocks/server";
-import { http, HttpResponse } from "msw";
+import { renderWithProviders } from "../../../test/utils/renderWithProviders";
+import LoginPage from "../LoginPage";
 
 const BASE = "http://localhost";
 
@@ -18,7 +18,9 @@ vi.mock("react-router-dom", async () => {
 describe("LoginPage", () => {
   it("renders the Sign in heading and subtitle", () => {
     renderWithProviders(<LoginPage />);
-    expect(screen.getByRole("heading", { name: "Sign in" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Sign in" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByText("Enter your credentials to access the scheduler."),
     ).toBeInTheDocument();
@@ -26,13 +28,9 @@ describe("LoginPage", () => {
 
   it("renders email, password fields and a Sign in button", () => {
     renderWithProviders(<LoginPage />);
-    expect(
-      screen.getByPlaceholderText("you@hospital.org"),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("you@hospital.org")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Sign in" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 
   it("shows validation errors when the form is submitted empty", async () => {
@@ -47,7 +45,10 @@ describe("LoginPage", () => {
   it("shows a validation error for an invalid email", async () => {
     const user = userEvent.setup();
     renderWithProviders(<LoginPage />);
-    await user.type(screen.getByPlaceholderText("you@hospital.org"), "not-an-email");
+    await user.type(
+      screen.getByPlaceholderText("you@hospital.org"),
+      "not-an-email",
+    );
     await user.type(screen.getByPlaceholderText("••••••••"), "password123");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
     expect(
@@ -93,10 +94,7 @@ describe("LoginPage", () => {
   it("shows a server error message on failed login", async () => {
     server.use(
       http.post(`${BASE}/api/v1/auth/login`, () =>
-        HttpResponse.json(
-          { title: "Invalid credentials" },
-          { status: 401 },
-        ),
+        HttpResponse.json({ title: "Invalid credentials" }, { status: 401 }),
       ),
     );
     const user = userEvent.setup();
@@ -112,8 +110,9 @@ describe("LoginPage", () => {
 
   it("falls back to a generic error message when the API returns no title", async () => {
     server.use(
-      http.post(`${BASE}/api/v1/auth/login`, () =>
-        new HttpResponse(null, { status: 500 }),
+      http.post(
+        `${BASE}/api/v1/auth/login`,
+        () => new HttpResponse(null, { status: 500 }),
       ),
     );
     const user = userEvent.setup();

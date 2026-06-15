@@ -2,9 +2,9 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import StaffFormModal from "../StaffFormModal";
 import { mockUser, mockStaffMember } from "../../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
+import StaffFormModal from "../StaffFormModal";
 
 describe("StaffFormModal — add mode", () => {
   it("renders the Add Staff Member heading", () => {

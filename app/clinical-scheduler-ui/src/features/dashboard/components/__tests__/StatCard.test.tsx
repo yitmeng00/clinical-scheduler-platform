@@ -7,7 +7,9 @@ import type { StatCardVariant } from "../StatCard";
 
 const variants: StatCardVariant[] = ["blue", "amber", "red", "green"];
 
-function renderCard(props: Partial<React.ComponentProps<typeof StatCard>> = {}) {
+function renderCard(
+  props: Partial<React.ComponentProps<typeof StatCard>> = {},
+) {
   return render(
     <MemoryRouter>
       <StatCard

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import authReducer, { logout, setCredentials } from "../authSlice";
 import { mockUser } from "../../../test/mocks/fixtures";
+import authReducer, { logout, setCredentials } from "../authSlice";
 
 const empty = { token: null, user: null, isAuthenticated: false };
 
@@ -54,7 +54,10 @@ describe("authSlice", () => {
 
     it("removes the user from localStorage", () => {
       localStorage.setItem("auth_user", JSON.stringify(mockUser));
-      authReducer({ token: "abc123", user: mockUser, isAuthenticated: true }, logout());
+      authReducer(
+        { token: "abc123", user: mockUser, isAuthenticated: true },
+        logout(),
+      );
       expect(localStorage.getItem("auth_user")).toBeNull();
     });
 

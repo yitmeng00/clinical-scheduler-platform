@@ -1,13 +1,13 @@
 import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import DashboardPage from "../DashboardPage";
 import {
   mockAdminUser,
   mockDeptLeadUser,
   mockUser,
 } from "../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../test/utils/renderWithProviders";
+import DashboardPage from "../DashboardPage";
 
 // Pin time so getGreeting() returns a deterministic greeting.
 beforeEach(() => vi.setSystemTime(new Date("2024-06-01T10:00:00")));
@@ -38,8 +38,8 @@ describe("DashboardPage", () => {
   it("shows the stats values after the API responds", async () => {
     renderWithProviders(<DashboardPage />, { user: mockUser });
     expect(await screen.findByText("12")).toBeInTheDocument(); // onDutyToday
-    expect(await screen.findByText("3")).toBeInTheDocument();  // pendingLeaves
-    expect(await screen.findByText("2")).toBeInTheDocument();  // overtimeAlerts
+    expect(await screen.findByText("3")).toBeInTheDocument(); // pendingLeaves
+    expect(await screen.findByText("2")).toBeInTheDocument(); // overtimeAlerts
     expect(await screen.findByText("48")).toBeInTheDocument(); // activeStaff
   });
 

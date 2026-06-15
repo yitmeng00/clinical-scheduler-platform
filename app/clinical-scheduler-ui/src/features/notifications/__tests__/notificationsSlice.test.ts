@@ -4,7 +4,6 @@ import notificationsReducer, {
   addNotification,
   markAllRead,
 } from "../notificationsSlice";
-
 import type { AppNotification } from "../notificationsSlice";
 const empty: { items: AppNotification[] } = { items: [] };
 
