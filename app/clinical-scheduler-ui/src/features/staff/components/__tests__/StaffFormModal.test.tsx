@@ -11,7 +11,9 @@ describe("StaffFormModal — add mode", () => {
     renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
       user: mockUser,
     });
-    expect(screen.getByText("Add Staff Member")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Add Staff Member" }),
+    ).toBeInTheDocument();
   });
 
   it("renders the password field in add mode", () => {
@@ -83,12 +85,7 @@ describe("StaffFormModal — add mode", () => {
     renderWithProviders(<StaffFormModal onClose={onClose} />, {
       user: mockUser,
     });
-    // X button is the only button without a text label
-    const buttons = screen.getAllByRole("button");
-    const xButton = buttons.find(
-      (b) => !b.textContent || b.textContent.trim() === "",
-    )!;
-    await user.click(xButton);
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalledOnce();
   });
 });
@@ -99,7 +96,9 @@ describe("StaffFormModal — edit mode", () => {
       <StaffFormModal staff={mockStaffMember} onClose={vi.fn()} />,
       { user: mockUser },
     );
-    expect(screen.getByText("Edit Staff Member")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Edit Staff Member" }),
+    ).toBeInTheDocument();
   });
 
   it("does not render the password field in edit mode", () => {

@@ -66,7 +66,7 @@ describe("Sidebar", () => {
   it("dispatches logout and navigates to /login when sign-out is clicked", async () => {
     const user = userEvent.setup();
     const { store } = renderSidebar();
-    await user.click(screen.getByTitle("Sign out"));
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
     expect(store.getState().auth.isAuthenticated).toBe(false);
     await waitFor(() =>
       expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true }),

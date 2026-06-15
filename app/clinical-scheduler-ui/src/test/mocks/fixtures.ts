@@ -4,6 +4,7 @@ import type {
   PendingLeave,
   TodayShift,
 } from "../../types/dashboard";
+import type { LeaveRequest } from "../../types/leave";
 import type { Department, StaffMember } from "../../types/user";
 
 export const mockUser: AuthUser = {
@@ -88,6 +89,40 @@ export const mockPendingLeaves: PendingLeave[] = [
     submittedAt: "2024-01-10T10:00:00Z",
   },
 ];
+
+export const mockLeaveRequest: LeaveRequest = {
+  id: 1,
+  staffId: 8,
+  staffFullName: "Mark Stevens",
+  staffInitials: "MS",
+  staffDepartment: "Front Desk",
+  leaveType: "Annual",
+  startDate: "2024-03-01",
+  endDate: "2024-03-05",
+  durationDays: 5,
+  reason: "Family vacation",
+  status: "Pending",
+  reviewNote: null,
+  reviewedBy: null,
+  reviewedAt: null,
+  submittedAt: "2024-02-10T10:00:00Z",
+  auditEntries: [],
+};
+
+export const mockApprovedLeave: LeaveRequest = {
+  ...mockLeaveRequest,
+  id: 2,
+  staffFullName: "Emma White",
+  staffInitials: "EW",
+  status: "Approved",
+  reviewedBy: "Admin User",
+  reviewedAt: "2024-02-11T10:00:00Z",
+  reviewNote: "Approved as requested",
+  auditEntries: [
+    { at: "2024-02-10T10:00:00Z", by: "Mark Stevens", action: "submitted", note: null },
+    { at: "2024-02-11T10:00:00Z", by: "Admin User", action: "approved", note: "Approved as requested" },
+  ],
+};
 
 export const mockLoginResponse = {
   accessToken: "mock-access-token",

@@ -117,6 +117,7 @@ export default function StaffFormModal({
             {isEdit ? "Edit Staff Member" : "Add Staff Member"}
           </h2>
           <button
+            aria-label="Close"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >

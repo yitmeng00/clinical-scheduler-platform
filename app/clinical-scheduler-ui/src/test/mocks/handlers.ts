@@ -61,8 +61,12 @@ export const handlers = [
   http.post(`${BASE}/api/v1/leaves`, () =>
     HttpResponse.json({ id: 1 }, { status: 201 }),
   ),
-  http.patch(`${BASE}/api/v1/leaves/:id/review`, () =>
+  http.put(`${BASE}/api/v1/leaves/:id/review`, () =>
     HttpResponse.json({ id: 1 }),
+  ),
+  http.delete(
+    `${BASE}/api/v1/leaves/:id`,
+    () => new HttpResponse(null, { status: 204 }),
   ),
 
   // Shifts / Schedule
