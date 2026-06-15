@@ -51,9 +51,11 @@ export const handlers = [
   http.put(`${BASE}/api/v1/staff/:id`, () =>
     HttpResponse.json(mockStaffMember),
   ),
-  http.put(
-    `${BASE}/api/v1/staff/:id/password`,
-    () => new HttpResponse(null, { status: 204 }),
+  http.patch(`${BASE}/api/v1/staff/:id/toggle-active`, () =>
+    HttpResponse.json(mockStaffMember),
+  ),
+  http.post(`${BASE}/api/v1/staff/:id/reset-password`, () =>
+    new HttpResponse(null, { status: 204 }),
   ),
 
   // Leaves

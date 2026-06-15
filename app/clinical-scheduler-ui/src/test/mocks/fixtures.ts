@@ -124,6 +124,29 @@ export const mockApprovedLeave: LeaveRequest = {
   ],
 };
 
+export const mockStaffMember2: StaffMember = {
+  id: 9,
+  fullName: "Emma White",
+  email: "e.white@hospital.org",
+  role: "Nurse",
+  departmentId: 1,
+  departmentName: "Emergency",
+  isActive: true,
+  phone: "555-0109",
+  initials: "EW",
+  employmentType: "FullTime",
+  createdAt: "2024-01-01T00:00:00Z",
+};
+
+export const mockInactiveStaff: StaffMember = {
+  ...mockStaffMember,
+  id: 10,
+  fullName: "Bob Johnson",
+  email: "b.johnson@hospital.org",
+  initials: "BJ",
+  isActive: false,
+};
+
 export const mockLoginResponse = {
   accessToken: "mock-access-token",
   expiresIn: 900,
