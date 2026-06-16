@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockShift } from "../../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
@@ -11,6 +11,9 @@ const YEAR = 2026;
 const MONTH = 5;
 
 describe("MonthGrid", () => {
+  beforeEach(() => vi.setSystemTime(new Date("2026-06-16T10:00:00")));
+  afterEach(() => vi.useRealTimers());
+
   it("renders Mon-Sun column headers", () => {
     renderWithProviders(
       <MonthGrid year={YEAR} month={MONTH} shifts={[]} approvedLeaves={[]} />,
