@@ -18,8 +18,9 @@ A full-stack responsive application for managing clinical staff schedules, leave
 10. [Authentication & Security](#10-authentication--security)
 11. [Real-Time Notifications](#11-real-time-notifications)
 12. [API Reference](#12-api-reference)
-13. [Getting Started](#13-getting-started)
-14. [License](#14-license)
+13. [Testing](#13-testing)
+14. [Getting Started](#14-getting-started)
+15. [License](#15-license)
 
 ---
 
@@ -516,7 +517,132 @@ All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` re
 
 ---
 
-## 13. Getting Started
+## 13. Testing
+
+The frontend test suite uses **Vitest 3** + **React Testing Library** + **MSW v2** (node mode). Tests exercise components end-to-end through the real Redux store and RTK Query layer — no mocked modules, no shallow rendering.
+
+### Stack
+
+| Tool                          | Role                                                         |
+| ----------------------------- | ------------------------------------------------------------ |
+| Vitest 3 + jsdom              | Test runner and DOM environment                              |
+| React Testing Library         | Component rendering and user-event simulation                |
+| MSW v2 (node)                 | Intercept HTTP at the network layer; no `fetch` mocks needed |
+| `@testing-library/user-event` | Realistic browser-like interaction (type, click, select)     |
+| `@vitest/coverage-v8`         | V8-native coverage with Istanbul branch tracking             |
+
+### Running the tests
+
+```bash
+cd app/clinical-scheduler-ui
+
+# Run all tests
+npm run test
+
+# Run with coverage report
+npm run test:coverage
+
+# Run a specific feature
+npx vitest run src/features/swaps
+```
+
+### Coverage target
+
+All feature files are maintained at **≥ 90 % statements, branches, and functions**.
+
+<details>
+<summary>View latest coverage summary</summary>
+
+```
+-------------------------------|---------|----------|---------|---------|-------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------------------|---------|----------|---------|---------|-------------------
+All files                      |   99.84 |    98.23 |   99.53 |   99.84 |
+ app                           |     100 |      100 |     100 |     100 |
+  hooks.ts                     |     100 |      100 |     100 |     100 |
+ components/layout             |   99.65 |    93.33 |     100 |   99.65 |
+  AppContainer.tsx             |     100 |      100 |     100 |     100 |
+  Sidebar.tsx                  |   99.16 |    95.45 |     100 |   99.16 | 93
+  TopBar.tsx                   |     100 |    90.32 |     100 |     100 | 14,31,106
+ components/ui                 |     100 |      100 |     100 |     100 |
+  FormField.tsx                |     100 |      100 |     100 |     100 |
+ features/audit                |   97.45 |    96.55 |     100 |   97.45 |
+  AuditPage.tsx                |   97.22 |       96 |     100 |   97.22 | 41-44
+  auditApi.ts                  |     100 |      100 |     100 |     100 |
+ features/auth                 |     100 |      100 |     100 |     100 |
+  LoginPage.tsx                |     100 |      100 |     100 |     100 |
+  authApi.ts                   |     100 |      100 |     100 |     100 |
+  authSlice.ts                 |     100 |      100 |     100 |     100 |
+ features/dashboard            |     100 |      100 |     100 |     100 |
+  DashboardPage.tsx            |     100 |      100 |     100 |     100 |
+  dashboardApi.ts              |     100 |      100 |     100 |     100 |
+ features/dashboard/components |     100 |      100 |     100 |     100 |
+  PendingLeavesPanel.tsx       |     100 |      100 |     100 |     100 |
+  StatCard.tsx                 |     100 |      100 |     100 |     100 |
+  TodayShiftsPanel.tsx         |     100 |      100 |     100 |     100 |
+ features/leaves               |     100 |      100 |     100 |     100 |
+  LeavesPage.tsx               |     100 |      100 |     100 |     100 |
+  leavesApi.ts                 |     100 |      100 |     100 |     100 |
+ features/leaves/components    |     100 |    96.42 |     100 |     100 |
+  ReviewLeaveModal.tsx         |     100 |      100 |     100 |     100 |
+  SubmitLeaveModal.tsx         |     100 |    91.66 |     100 |     100 | 79
+ features/notifications        |     100 |      100 |     100 |     100 |
+  notificationsSlice.ts        |     100 |      100 |     100 |     100 |
+ features/overtime             |     100 |      100 |     100 |     100 |
+  OvertimePage.tsx             |     100 |      100 |     100 |     100 |
+  overtimeApi.ts               |     100 |      100 |     100 |     100 |
+ features/profile              |     100 |      100 |     100 |     100 |
+  ProfilePanel.tsx             |     100 |      100 |     100 |     100 |
+  profileApi.ts                |     100 |      100 |     100 |     100 |
+ features/schedule             |     100 |    98.57 |   95.23 |     100 |
+  SchedulePage.tsx             |     100 |     98.3 |   92.85 |     100 | 75
+  shiftsApi.ts                 |     100 |      100 |     100 |     100 |
+ features/schedule/components  |    99.8 |    95.06 |     100 |    99.8 |
+  CreateShiftModal.tsx         |   99.38 |     91.3 |     100 |   99.38 | 69
+  DayColumn.tsx                |     100 |      100 |     100 |     100 |
+  MonthGrid.tsx                |     100 |    95.83 |     100 |     100 | 151
+  ShiftCard.tsx                |     100 |      100 |     100 |     100 |
+  ShiftLegend.tsx              |     100 |      100 |     100 |     100 |
+  WeeklyGrid.tsx               |     100 |    91.66 |     100 |     100 | 46
+ features/staff                |     100 |      100 |     100 |     100 |
+  StaffPage.tsx                |     100 |      100 |     100 |     100 |
+ features/staff/components     |     100 |    98.38 |     100 |     100 |
+  ResetPasswordModal.tsx       |     100 |      100 |     100 |     100 |
+  StaffFormModal.tsx           |     100 |    97.87 |     100 |     100 | 86
+ features/swaps                |     100 |    98.24 |     100 |     100 |
+  SwapsPage.tsx                |     100 |    97.91 |     100 |     100 | 112
+  swapsApi.ts                  |     100 |      100 |     100 |     100 |
+ features/swaps/components     |     100 |      100 |     100 |     100 |
+  RequestSwapModal.tsx         |     100 |      100 |     100 |     100 |
+  ViewSwapModal.tsx            |     100 |      100 |     100 |     100 |
+ hooks                         |     100 |      100 |     100 |     100 |
+  useWeekNavigation.ts         |     100 |      100 |     100 |     100 |
+ schemas                       |     100 |      100 |     100 |     100 |
+  auth.ts                      |     100 |      100 |     100 |     100 |
+  shift.ts                     |     100 |      100 |     100 |     100 |
+ services                      |     100 |      100 |     100 |     100 |
+  api.ts                       |     100 |      100 |     100 |     100 |
+  departmentsApi.ts            |     100 |      100 |     100 |     100 |
+  staffApi.ts                  |     100 |      100 |     100 |     100 |
+ utils                         |     100 |      100 |     100 |     100 |
+  dateUtils.ts                 |     100 |      100 |     100 |     100 |
+-------------------------------|---------|----------|---------|---------|-------------------
+```
+
+![Dashboard](docs/screenshots/playwright-test-report.png)
+
+</details>
+
+### What is tested
+
+- **Unit tests** — pure functions and Redux slices (`authSlice`, `notificationsSlice`, Zod schemas, date utilities, `selectSwapPendingCount`)
+- **RTK Query** — all API hooks are exercised through component renders backed by MSW handlers; the token-refresh reauth flow is covered with stateful MSW overrides
+- **Component integration** — every modal open/close path, every form field's `onChange` handler, every error/loading/empty state, and every role-gated UI branch
+- **Reauth middleware** — `baseQueryWithReauth` is tested for both the refresh-succeeds path (token rotated, request retried) and the refresh-fails path (`logout` dispatched)
+
+---
+
+## 14. Getting Started
 
 ### Prerequisites
 
@@ -590,6 +716,6 @@ dotnet publish -c Release
 
 The frontend `dist/` folder can be served as static files from the .NET host or a separate CDN. Update the CORS policy in `Program.cs` with the production frontend origin before deploying.
 
-## 14. License
+## 15. License
 
 This project is licensed under the [MIT License](LICENSE).
