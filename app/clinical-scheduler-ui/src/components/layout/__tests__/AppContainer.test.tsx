@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { mockUser } from "../../../test/mocks/fixtures";
@@ -35,5 +36,24 @@ describe("AppContainer", () => {
   it("shows the user's full name in the sidebar", () => {
     renderWithProviders(<AppContainer />, { user: mockUser });
     expect(screen.getByText("Mark Stevens")).toBeInTheDocument();
+  });
+
+  it("opens the mobile sidebar when the hamburger button is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppContainer />, { user: mockUser });
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(
+      screen.getByRole("button", { name: "Close menu" }),
+    ).toBeInTheDocument();
+  });
+
+  it("closes the mobile sidebar when the close button is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AppContainer />, { user: mockUser });
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    await user.click(screen.getByRole("button", { name: "Close menu" }));
+    expect(
+      screen.queryByRole("button", { name: "Close menu" }),
+    ).not.toBeInTheDocument();
   });
 });

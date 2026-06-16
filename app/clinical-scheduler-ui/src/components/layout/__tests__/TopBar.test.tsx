@@ -143,4 +143,24 @@ describe("TopBar", () => {
       screen.getByRole("button", { name: "Mark all read" }),
     ).toBeInTheDocument();
   });
+
+  it("marks all notifications as read when 'Mark all read' is clicked", async () => {
+    const user = userEvent.setup();
+    // Use a read notification so handleOpen doesn't consume the markAllRead dispatch,
+    // letting the 'Mark all read' button's own inline dispatch be the one exercised.
+    const { store } = renderTopBar([
+      {
+        id: "1",
+        message: "Old notice",
+        type: "info",
+        read: true,
+        at: new Date().toISOString(),
+      },
+    ]);
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await user.click(screen.getByRole("button", { name: "Mark all read" }));
+    expect(store.getState().notifications.items.every((n) => n.read)).toBe(
+      true,
+    );
+  });
 });

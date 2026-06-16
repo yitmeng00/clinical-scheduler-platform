@@ -122,4 +122,24 @@ describe("Sidebar", () => {
     // mockSwapRequest.status = "PendingRequestee" → selectSwapPendingCount returns 1
     expect(await screen.findByText("1")).toBeInTheDocument();
   });
+
+  it("opens the profile panel when the profile button is clicked", async () => {
+    const user = userEvent.setup();
+    renderSidebar();
+    await user.click(screen.getByTitle("View profile"));
+    expect(
+      await screen.findByRole("heading", { name: "My Profile" }),
+    ).toBeInTheDocument();
+  });
+
+  it("closes the profile panel when the close button is clicked", async () => {
+    const user = userEvent.setup();
+    renderSidebar();
+    await user.click(screen.getByTitle("View profile"));
+    await screen.findByRole("heading", { name: "My Profile" });
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(
+      screen.queryByRole("heading", { name: "My Profile" }),
+    ).not.toBeInTheDocument();
+  });
 });
