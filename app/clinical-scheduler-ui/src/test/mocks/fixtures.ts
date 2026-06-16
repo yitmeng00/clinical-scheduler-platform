@@ -1,3 +1,6 @@
+import type { AuditEntry } from "../../features/audit/auditApi";
+import type { OvertimeRecord } from "../../features/overtime/overtimeApi";
+import type { MyProfile } from "../../features/profile/profileApi";
 import type { AuthUser } from "../../types/auth";
 import type {
   DashboardStats,
@@ -6,6 +9,7 @@ import type {
 } from "../../types/dashboard";
 import type { LeaveRequest } from "../../types/leave";
 import type { Shift } from "../../types/shift";
+import type { SwapRequest } from "../../types/swap";
 import type { Department, StaffMember } from "../../types/user";
 
 export const mockUser: AuthUser = {
@@ -174,4 +178,60 @@ export const mockLoginResponse = {
   accessToken: "mock-access-token",
   expiresIn: 900,
   staff: mockUser,
+};
+
+export const mockSwapRequest: SwapRequest = {
+  id: 1,
+  requesterId: 9,
+  requesterName: "Emma White",
+  requesterInitials: "EW",
+  requesterDepartment: "Emergency",
+  requesteeId: 8,
+  requesteeName: "Mark Stevens",
+  requesteeInitials: "MS",
+  requesteeDepartment: "Front Desk",
+  requesterShiftId: 2,
+  requesterShiftDate: "2026-07-01",
+  requesterShiftType: "Morning",
+  requesteeShiftId: 1,
+  requesteeShiftDate: "2026-07-02",
+  requesteeShiftType: "Afternoon",
+  reason: "Family appointment",
+  status: "PendingRequestee",
+  submittedAt: "2026-06-15T10:00:00Z",
+  auditEntries: [],
+};
+
+export const mockOvertimeRecord: OvertimeRecord = {
+  staffId: 8,
+  fullName: "Mark Stevens",
+  initials: "MS",
+  department: "Front Desk",
+  role: "Receptionist",
+  employmentType: "FullTime",
+  shiftCount: 6,
+  totalHours: 48,
+  regularHours: 40,
+  overtimeHours: 8,
+  isOvertime: true,
+};
+
+export const mockAuditEntry: AuditEntry = {
+  at: "2026-06-15T10:00:00Z",
+  category: "Leave",
+  by: "Mark Stevens",
+  action: "submitted",
+  note: null,
+  subject: "Annual Leave",
+};
+
+export const mockMyProfile: MyProfile = {
+  id: 8,
+  fullName: "Mark Stevens",
+  email: "m.stevens@hospital.org",
+  initials: "MS",
+  role: "Receptionist",
+  department: "Front Desk",
+  phone: "555-0108",
+  employmentType: "FullTime",
 };

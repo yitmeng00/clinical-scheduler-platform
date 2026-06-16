@@ -4,6 +4,7 @@ import {
   mockDashboardStats,
   mockDepartments,
   mockLoginResponse,
+  mockMyProfile,
   mockPendingLeaves,
   mockStaffMember,
   mockTodayShifts,
@@ -75,6 +76,7 @@ export const handlers = [
 
   // Shifts / Schedule
   http.get(`${BASE}/api/v1/shifts`, () => HttpResponse.json([])),
+  http.get(`${BASE}/api/v1/shifts/upcoming`, () => HttpResponse.json([])),
   http.post(`${BASE}/api/v1/shifts`, () =>
     HttpResponse.json({ id: 1 }, { status: 201 }),
   ),
@@ -89,19 +91,28 @@ export const handlers = [
   http.post(`${BASE}/api/v1/swaps`, () =>
     HttpResponse.json({ id: 1 }, { status: 201 }),
   ),
-  http.patch(`${BASE}/api/v1/swaps/:id/review`, () =>
+  http.put(`${BASE}/api/v1/swaps/:id/respond`, () =>
     HttpResponse.json({ id: 1 }),
+  ),
+  http.put(`${BASE}/api/v1/swaps/:id/review`, () =>
+    HttpResponse.json({ id: 1 }),
+  ),
+  http.delete(
+    `${BASE}/api/v1/swaps/:id`,
+    () => new HttpResponse(null, { status: 204 }),
   ),
 
   // Overtime
   http.get(`${BASE}/api/v1/overtime`, () => HttpResponse.json([])),
 
   // Audit
-  http.get(`${BASE}/api/v1/audit`, () =>
-    HttpResponse.json({ items: [], totalCount: 0, page: 1, pageSize: 20 }),
-  ),
+  http.get(`${BASE}/api/v1/audit`, () => HttpResponse.json([])),
 
   // Profile
-  http.get(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockStaffMember)),
-  http.put(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockStaffMember)),
+  http.get(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockMyProfile)),
+  http.put(`${BASE}/api/v1/profile`, () => HttpResponse.json(mockMyProfile)),
+  http.put(
+    `${BASE}/api/v1/profile/password`,
+    () => new HttpResponse(null, { status: 204 }),
+  ),
 ];
