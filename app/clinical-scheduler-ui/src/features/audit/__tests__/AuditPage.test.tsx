@@ -135,4 +135,32 @@ describe("AuditPage", () => {
     // The select now shows "Leave" as selected
     expect(screen.getByDisplayValue("Leave")).toBeInTheDocument();
   });
+
+  it("renders an entry with an unknown category using the default badge style", async () => {
+    const unknownCategoryEntry = {
+      ...mockAuditEntry,
+      category: "Other",
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/audit`, () =>
+        HttpResponse.json([unknownCategoryEntry]),
+      ),
+    );
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    expect(await screen.findByText("Other")).toBeInTheDocument();
+  });
+
+  it("renders an entry with an unknown action using the default badge style", async () => {
+    const unknownActionEntry = {
+      ...mockAuditEntry,
+      action: "updated",
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/audit`, () =>
+        HttpResponse.json([unknownActionEntry]),
+      ),
+    );
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    expect(await screen.findAllByText("updated")).toHaveLength(2);
+  });
 });
