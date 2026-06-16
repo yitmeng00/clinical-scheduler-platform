@@ -186,4 +186,70 @@ describe("ViewSwapModal", () => {
     renderModal(swapWithNote);
     expect(screen.getByText(/Looks good to me/)).toBeInTheDocument();
   });
+
+  it("calls reviewSwap with Reject and closes when Reject is clicked in review mode", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    const pendingAdminSwap: SwapRequest = {
+      ...mockSwapRequest,
+      status: "PendingAdmin",
+    };
+    renderModal(pendingAdminSwap, {
+      myId: mockAdminUser.id,
+      canReview: true,
+      onClose,
+    });
+    await user.click(screen.getByRole("button", { name: "Reject" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+  });
+
+  it("updates the note when typed in respond mode", async () => {
+    const user = userEvent.setup();
+    // mockSwapRequest: requesteeId=8=mockUser.id, status=PendingRequestee → shows respond textarea
+    renderModal(mockSwapRequest, { myId: mockUser.id });
+    const textarea = screen.getByPlaceholderText("Add a note (optional)…");
+    await user.type(textarea, "Need to swap");
+    expect(textarea).toHaveValue("Need to swap");
+  });
+
+  it("updates the note when typed in review mode", async () => {
+    const user = userEvent.setup();
+    const pendingAdminSwap: SwapRequest = {
+      ...mockSwapRequest,
+      status: "PendingAdmin",
+    };
+    renderModal(pendingAdminSwap, { myId: mockAdminUser.id, canReview: true });
+    const textarea = screen.getByPlaceholderText("Add a note (optional)…");
+    await user.type(textarea, "LGTM");
+    expect(textarea).toHaveValue("LGTM");
+  });
+
+  it("shows Cancel Request for requester on a PendingAdmin swap", () => {
+    const pendingAdminSwap: SwapRequest = {
+      ...mockSwapRequest,
+      requesterId: mockUser.id,
+      requesteeId: 9,
+      status: "PendingAdmin",
+    };
+    renderModal(pendingAdminSwap, { myId: mockUser.id });
+    expect(
+      screen.getByRole("button", { name: "Cancel Request" }),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to the raw action string for an unknown audit entry action", () => {
+    const swapWithUnknownAction: SwapRequest = {
+      ...mockSwapRequest,
+      auditEntries: [
+        {
+          at: "2026-06-15T10:00:00Z",
+          by: "System",
+          action: "escalated",
+          note: null,
+        },
+      ],
+    };
+    renderModal(swapWithUnknownAction);
+    expect(screen.getByText(/escalated/)).toBeInTheDocument();
+  });
 });

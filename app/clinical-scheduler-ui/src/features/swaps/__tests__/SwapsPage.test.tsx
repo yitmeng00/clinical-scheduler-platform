@@ -126,4 +126,56 @@ describe("SwapsPage", () => {
       screen.getByRole("heading", { name: "Shift Swap" }),
     ).toBeInTheDocument();
   });
+
+  it("switches to Pending tab and shows filtered empty state", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SwapsPage />, { user: mockUser });
+    await user.click(screen.getByRole("button", { name: "Pending" }));
+    expect(
+      await screen.findByText("No pending swap requests."),
+    ).toBeInTheDocument();
+  });
+
+  it("closes RequestSwapModal when Cancel is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SwapsPage />, { user: mockUser });
+    await user.click(screen.getByRole("button", { name: /Request Swap/ }));
+    expect(
+      screen.getByRole("heading", { name: "Request Shift Swap" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByRole("heading", { name: "Request Shift Swap" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes ViewSwapModal when Close is clicked", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/swaps`, () =>
+        HttpResponse.json([mockSwapRequest]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<SwapsPage />, { user: mockUser });
+    await user.click(await screen.findByRole("button", { name: "Respond" }));
+    expect(
+      screen.getByRole("heading", { name: "Shift Swap" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(
+      screen.queryByRole("heading", { name: "Shift Swap" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows 'View' action label for a swap the current user cannot action", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/swaps`, () =>
+        HttpResponse.json([{ ...mockSwapRequest, status: "Approved" }]),
+      ),
+    );
+    renderWithProviders(<SwapsPage />, { user: mockUser });
+    expect(
+      await screen.findByRole("button", { name: "View" }),
+    ).toBeInTheDocument();
+  });
 });
