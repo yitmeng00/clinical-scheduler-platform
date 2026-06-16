@@ -1,10 +1,14 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import { mockUser } from "../../../../test/mocks/fixtures";
+import { server } from "../../../../test/mocks/server";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
 import SubmitLeaveModal from "../SubmitLeaveModal";
+
+const BASE = "http://localhost";
 
 function renderModal(onClose = vi.fn()) {
   return renderWithProviders(<SubmitLeaveModal onClose={onClose} />, {
@@ -132,5 +136,45 @@ describe("SubmitLeaveModal", () => {
     );
     await user.click(container.firstChild as Element);
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("shows 'Submitting…' while the leave request is in flight", async () => {
+    server.use(
+      http.post(`${BASE}/api/v1/leaves`, async () => {
+        await new Promise((r) => setTimeout(r, 300));
+        return HttpResponse.json({});
+      }),
+    );
+    const user = userEvent.setup();
+    const { container } = renderModal();
+    await user.type(
+      container.querySelector<HTMLInputElement>('input[name="startDate"]')!,
+      "2026-08-01",
+    );
+    await user.type(
+      container.querySelector<HTMLInputElement>('input[name="endDate"]')!,
+      "2026-08-05",
+    );
+    await user.type(container.querySelector("textarea")!, "Family vacation");
+    await user.click(screen.getByRole("button", { name: "Submit Request" }));
+    expect(await screen.findByText("Submitting…")).toBeInTheDocument();
+  });
+
+  it("shows a validation error for leave type when the field is cleared", async () => {
+    const user = userEvent.setup();
+    const { container } = renderModal();
+    // Force the select value to empty so Zod's min(1) rule fires
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "" } });
+    await user.type(
+      container.querySelector<HTMLInputElement>('input[name="startDate"]')!,
+      "2026-08-01",
+    );
+    await user.type(
+      container.querySelector<HTMLInputElement>('input[name="endDate"]')!,
+      "2026-08-05",
+    );
+    await user.type(container.querySelector("textarea")!, "test reason");
+    await user.click(screen.getByRole("button", { name: "Submit Request" }));
+    expect(await screen.findByText("Select a leave type")).toBeInTheDocument();
   });
 });
