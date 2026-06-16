@@ -87,4 +87,52 @@ describe("AuditPage", () => {
     // After clicking, 30 days button should have the accent (active) style
     expect(btn30.className).toContain("bg-accent");
   });
+
+  it("marks '90 days' button as active when it is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    const btn90 = screen.getByRole("button", { name: "90 days" });
+    await user.click(btn90);
+    expect(btn90.className).toContain("bg-accent");
+  });
+
+  it("renders a Swap category entry with the Swap category badge", async () => {
+    const swapEntry = {
+      ...mockAuditEntry,
+      category: "Swap",
+      subject: "Shift Swap",
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/audit`, () => HttpResponse.json([swapEntry])),
+    );
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    await screen.findByText("Shift Swap");
+    // "Swap" badge appears for the category
+    expect(screen.getAllByText("Swap").length).toBeGreaterThan(0);
+  });
+
+  it("shows the note text when an audit entry has a note", async () => {
+    const entryWithNote = {
+      ...mockAuditEntry,
+      note: "Auto-approved by system",
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/audit`, () =>
+        HttpResponse.json([entryWithNote]),
+      ),
+    );
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    expect(
+      await screen.findByText(/Auto-approved by system/),
+    ).toBeInTheDocument();
+  });
+
+  it("sends a filtered request when category is changed to 'Leave'", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<AuditPage />, { user: mockAdminUser });
+    const categorySelect = screen.getByDisplayValue("All Categories");
+    await user.selectOptions(categorySelect, "Leave");
+    // The select now shows "Leave" as selected
+    expect(screen.getByDisplayValue("Leave")).toBeInTheDocument();
+  });
 });

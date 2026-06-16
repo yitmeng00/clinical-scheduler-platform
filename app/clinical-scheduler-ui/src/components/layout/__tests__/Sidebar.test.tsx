@@ -1,8 +1,15 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
-import { mockAdminUser, mockUser } from "../../../test/mocks/fixtures";
+import {
+  mockAdminUser,
+  mockLeaveRequest,
+  mockSwapRequest,
+  mockUser,
+} from "../../../test/mocks/fixtures";
+import { server } from "../../../test/mocks/server";
 import { renderWithProviders } from "../../../test/utils/renderWithProviders";
 import Sidebar from "../Sidebar";
 
@@ -92,5 +99,27 @@ describe("Sidebar", () => {
     );
     await user.click(screen.getByRole("button", { name: "Close menu" }));
     expect(onMobileClose).toHaveBeenCalledOnce();
+  });
+
+  it("renders leave pending badge when there are pending leave requests", async () => {
+    server.use(
+      http.get("http://localhost/api/v1/leaves", () =>
+        HttpResponse.json([mockLeaveRequest]),
+      ),
+    );
+    renderSidebar();
+    // mockLeaveRequest.status = "Pending" → selectPendingCount returns 1
+    expect(await screen.findByText("1")).toBeInTheDocument();
+  });
+
+  it("renders swap pending badge when there are pending swap requests", async () => {
+    server.use(
+      http.get("http://localhost/api/v1/swaps", () =>
+        HttpResponse.json([mockSwapRequest]),
+      ),
+    );
+    renderSidebar();
+    // mockSwapRequest.status = "PendingRequestee" → selectSwapPendingCount returns 1
+    expect(await screen.findByText("1")).toBeInTheDocument();
   });
 });
