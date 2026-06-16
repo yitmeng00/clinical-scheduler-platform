@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { mockUser } from "../../../test/mocks/fixtures";
 import authReducer, { logout, setCredentials } from "../authSlice";
@@ -64,6 +64,17 @@ describe("authSlice", () => {
     it("is safe to call on an already-logged-out state", () => {
       const state = authReducer(empty, logout());
       expect(state.isAuthenticated).toBe(false);
+    });
+  });
+
+  describe("localStorage initialization", () => {
+    it("restores user and sets isAuthenticated when auth_user is in localStorage", async () => {
+      localStorage.setItem("auth_user", JSON.stringify(mockUser));
+      vi.resetModules();
+      const { default: freshReducer } = await import("../authSlice");
+      const state = freshReducer(undefined, { type: "@@INIT" });
+      expect(state.user).toEqual(mockUser);
+      expect(state.isAuthenticated).toBe(true);
     });
   });
 });
