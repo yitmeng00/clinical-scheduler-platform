@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -123,5 +123,67 @@ describe("ViewSwapModal", () => {
     const { container } = renderModal(mockSwapRequest, { onClose });
     await user.click(container.firstChild as Element);
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("calls respondSwap with Accept and closes when Accept is clicked", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    // mockSwapRequest: requesteeId=8=mockUser.id, status=PendingRequestee → shows Accept/Reject
+    renderModal(mockSwapRequest, { myId: mockUser.id, onClose });
+    await user.click(screen.getByRole("button", { name: "Accept" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+  });
+
+  it("calls respondSwap with Reject and closes when Reject is clicked in respond mode", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    renderModal(mockSwapRequest, { myId: mockUser.id, onClose });
+    await user.click(screen.getByRole("button", { name: "Reject" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+  });
+
+  it("calls reviewSwap with Approve and closes when Approve is clicked", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    const pendingAdminSwap: SwapRequest = {
+      ...mockSwapRequest,
+      status: "PendingAdmin",
+    };
+    renderModal(pendingAdminSwap, {
+      myId: mockAdminUser.id,
+      canReview: true,
+      onClose,
+    });
+    await user.click(screen.getByRole("button", { name: "Approve" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+  });
+
+  it("calls cancelSwap and closes when Cancel Request is clicked", async () => {
+    const onClose = vi.fn();
+    const user = userEvent.setup();
+    const mySwap: SwapRequest = {
+      ...mockSwapRequest,
+      requesterId: mockUser.id,
+      requesteeId: 9,
+    };
+    renderModal(mySwap, { myId: mockUser.id, onClose });
+    await user.click(screen.getByRole("button", { name: "Cancel Request" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+  });
+
+  it("shows audit entry note text when a note is present", () => {
+    const swapWithNote: SwapRequest = {
+      ...mockSwapRequest,
+      auditEntries: [
+        {
+          at: "2026-06-15T10:00:00Z",
+          by: "Admin User",
+          action: "approved",
+          note: "Looks good to me",
+        },
+      ],
+    };
+    renderModal(swapWithNote);
+    expect(screen.getByText(/Looks good to me/)).toBeInTheDocument();
   });
 });
