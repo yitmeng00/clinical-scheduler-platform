@@ -217,4 +217,30 @@ describe("ProfilePanel", () => {
     await screen.findByText("Mark Stevens");
     expect(screen.getByText(mockMyProfile.initials)).toBeInTheDocument();
   });
+
+  it("renders an unknown role using the raw role text and default badge style", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/profile`, () =>
+        HttpResponse.json({ ...mockMyProfile, role: "Volunteer" }),
+      ),
+    );
+    renderPanel();
+    expect(await screen.findByText("Volunteer")).toBeInTheDocument();
+  });
+
+  it("renders an unknown employment type as raw text and shows '—' when phone is null", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/profile`, () =>
+        HttpResponse.json({
+          ...mockMyProfile,
+          employmentType: "Casual",
+          phone: null,
+        }),
+      ),
+    );
+    renderPanel();
+    await screen.findByText("Mark Stevens");
+    expect(screen.getByText("Casual")).toBeInTheDocument();
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
 });
