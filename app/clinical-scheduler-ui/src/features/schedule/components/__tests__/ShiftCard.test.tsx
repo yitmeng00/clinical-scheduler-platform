@@ -1,7 +1,12 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, useDraggable } from "@dnd-kit/core";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@dnd-kit/core", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@dnd-kit/core")>();
+  return { ...mod, useDraggable: vi.fn() };
+});
 
 import { mockShift } from "../../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
@@ -19,6 +24,18 @@ function renderCard(props: Partial<Parameters<typeof ShiftCard>[0]> = {}) {
     </DndContext>,
   );
 }
+
+const defaultDraggable = {
+  attributes: {},
+  listeners: undefined,
+  setNodeRef: vi.fn(),
+  transform: null,
+  isDragging: false,
+} as unknown as ReturnType<typeof useDraggable>;
+
+beforeEach(() => {
+  vi.mocked(useDraggable).mockReturnValue(defaultDraggable);
+});
 
 describe("ShiftCard", () => {
   it("renders the staff name and initials", () => {
@@ -62,5 +79,16 @@ describe("ShiftCard", () => {
     renderCard({ canEdit: true, onDelete });
     await user.click(screen.getByRole("button", { name: "Delete shift" }));
     expect(onDelete).toHaveBeenCalledWith(mockShift.id);
+  });
+
+  it("applies a transform style and dragging opacity when the card is being dragged", () => {
+    vi.mocked(useDraggable).mockReturnValueOnce({
+      ...defaultDraggable,
+      transform: { x: 10, y: 5, scaleX: 1, scaleY: 1 },
+      isDragging: true,
+    } as unknown as ReturnType<typeof useDraggable>);
+    const { container } = renderCard({ canEdit: true });
+    expect(container.querySelector('[style*="translate"]')).toBeInTheDocument();
+    expect(container.querySelector(".opacity-50")).toBeInTheDocument();
   });
 });

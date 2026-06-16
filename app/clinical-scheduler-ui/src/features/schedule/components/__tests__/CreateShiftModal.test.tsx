@@ -174,6 +174,13 @@ describe("CreateShiftModal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
+  it("changes the active shift type when the Afternoon option is clicked", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await user.click(screen.getByRole("radio", { name: /Afternoon/ }));
+    expect(screen.getByRole("radio", { name: /Afternoon/ })).toBeChecked();
+  });
+
   it("calls onSubmit with correct values on valid submission", async () => {
     server.use(
       http.get(`${BASE}/api/v1/staff`, () =>

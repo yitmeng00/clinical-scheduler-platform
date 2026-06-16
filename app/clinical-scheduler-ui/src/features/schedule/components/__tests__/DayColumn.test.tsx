@@ -1,7 +1,12 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, useDroppable } from "@dnd-kit/core";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@dnd-kit/core", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@dnd-kit/core")>();
+  return { ...mod, useDroppable: vi.fn() };
+});
 
 import { mockShift } from "../../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
@@ -26,6 +31,13 @@ function renderColumn(props: Partial<Parameters<typeof DayColumn>[0]> = {}) {
     </DndContext>,
   );
 }
+
+beforeEach(() => {
+  vi.mocked(useDroppable).mockReturnValue({
+    setNodeRef: vi.fn(),
+    isOver: false,
+  } as unknown as ReturnType<typeof useDroppable>);
+});
 
 describe("DayColumn", () => {
   it("renders the day abbreviation and date number", () => {
@@ -67,5 +79,14 @@ describe("DayColumn", () => {
     renderColumn({ shifts: [mockShift], canEdit: true, onDelete });
     await user.click(screen.getByRole("button", { name: "Delete shift" }));
     expect(onDelete).toHaveBeenCalledWith(mockShift.id);
+  });
+
+  it("applies drag-over styles when a card is dragged over the column", () => {
+    vi.mocked(useDroppable).mockReturnValueOnce({
+      setNodeRef: vi.fn(),
+      isOver: true,
+    } as unknown as ReturnType<typeof useDroppable>);
+    const { container } = renderColumn();
+    expect(container.innerHTML).toContain("border-accent");
   });
 });

@@ -9,6 +9,7 @@ import {
   mockAdminUser,
   mockDeptLeadUser,
   mockShift,
+  mockStaffMember,
   mockUser,
 } from "../../../test/mocks/fixtures";
 import { server } from "../../../test/mocks/server";
@@ -99,6 +100,30 @@ describe("SchedulePage", () => {
   it("opens CreateShiftModal when 'New Shift' is clicked", async () => {
     const user = userEvent.setup();
     renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+    await user.click(screen.getByRole("button", { name: /New Shift/ }));
+    expect(
+      screen.getByRole("heading", { name: "New Shift" }),
+    ).toBeInTheDocument();
+  });
+
+  it("closes CreateShiftModal when Cancel is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+    await user.click(screen.getByRole("button", { name: /New Shift/ }));
+    expect(
+      screen.getByRole("heading", { name: "New Shift" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByRole("heading", { name: "New Shift" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens CreateShiftModal with today's date pre-filled when in month view", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByText("Mon");
     await user.click(screen.getByRole("button", { name: /New Shift/ }));
     expect(
       screen.getByRole("heading", { name: "New Shift" }),
@@ -203,6 +228,100 @@ describe("SchedulePage", () => {
     });
 
     await waitFor(() => expect(patchCalled).toBe(true));
+  });
+
+  it("calls POST /shifts when a new shift is submitted via the modal", async () => {
+    let postCalled = false;
+    server.use(
+      http.get(`${BASE}/api/v1/staff`, () =>
+        HttpResponse.json([mockStaffMember]),
+      ),
+      http.post(`${BASE}/api/v1/shifts`, () => {
+        postCalled = true;
+        return HttpResponse.json(mockShift);
+      }),
+    );
+    const user = userEvent.setup();
+    const { container } = renderWithProviders(<SchedulePage />, {
+      user: mockAdminUser,
+    });
+    await user.click(screen.getByRole("button", { name: /New Shift/ }));
+    const staffOption = await screen.findByRole("option", {
+      name: /Mark Stevens/,
+    });
+    await user.selectOptions(staffOption.closest("select")!, staffOption);
+    await user.type(
+      container.querySelector<HTMLInputElement>('input[name="date"]')!,
+      "2026-07-01",
+    );
+    await user.click(screen.getByRole("button", { name: "Create Shift" }));
+    await waitFor(() => expect(postCalled).toBe(true));
+  });
+
+  it("renders department options and filters shifts by department in both views", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/staff`, () =>
+        HttpResponse.json([
+          mockStaffMember,
+          { ...mockStaffMember, id: 99 },
+          {
+            ...mockStaffMember,
+            id: 88,
+            departmentId: 6,
+            departmentName: "ICU",
+          },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+
+    // Wait for department options (staff list loaded → useMemo runs → dept map built)
+    await screen.findByRole("option", { name: "Front Desk" });
+
+    // Select a department: covers line 170 truthy branch + lines 56-57 + 176-178
+    await user.selectOptions(
+      screen.getByDisplayValue("All departments"),
+      screen.getByRole("option", { name: "Front Desk" }),
+    );
+
+    // Switch to month view while dept is selected → covers shiftsApi line 35
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByText("Mon");
+
+    // Clear the filter: covers line 170 falsy branch → undefined
+    await user.selectOptions(
+      screen.getByDisplayValue("Front Desk"),
+      screen.getByRole("option", { name: "All departments" }),
+    );
+  });
+
+  describe("month boundary navigation", () => {
+    beforeEach(() => vi.setSystemTime(new Date("2026-01-15T10:00:00")));
+    afterEach(() => vi.useRealTimers());
+
+    it("wraps from January to December when Previous is clicked in month view", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+      await user.click(screen.getByRole("button", { name: "Month" }));
+      await screen.findByText("Mon");
+      const heading = screen.getByRole("heading", { name: "Schedule" });
+      expect(heading.nextElementSibling?.textContent).toContain("January");
+      await user.click(screen.getByRole("button", { name: "Previous" }));
+      expect(heading.nextElementSibling?.textContent).toContain("December");
+    });
+
+    it("wraps from December to January when Next is clicked in month view", async () => {
+      vi.setSystemTime(new Date("2025-12-15T10:00:00"));
+      const user = userEvent.setup();
+      renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+      await user.click(screen.getByRole("button", { name: "Month" }));
+      await screen.findByText("Mon");
+      const heading = screen.getByRole("heading", { name: "Schedule" });
+      expect(heading.nextElementSibling?.textContent).toContain("December");
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      expect(heading.nextElementSibling?.textContent).toContain("January");
+    });
   });
 
   it("deletes a shift when the Delete shift button is clicked", async () => {
