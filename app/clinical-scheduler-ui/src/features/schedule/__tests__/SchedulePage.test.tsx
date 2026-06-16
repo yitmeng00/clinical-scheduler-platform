@@ -1,7 +1,9 @@
-import { screen, waitFor } from "@testing-library/react";
+import type { DragEndEvent } from "@dnd-kit/core";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it } from "vitest";
+import React from "react";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   mockAdminUser,
@@ -12,6 +14,20 @@ import {
 import { server } from "../../../test/mocks/server";
 import { renderWithProviders } from "../../../test/utils/renderWithProviders";
 import SchedulePage from "../SchedulePage";
+
+// Wrap DndContext to capture onDragEnd so we can simulate drags in SchedulePage tests.
+let capturedOnDragEnd: ((event: DragEndEvent) => void) | undefined;
+vi.mock("@dnd-kit/core", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@dnd-kit/core")>();
+  const { DndContext: RealDndContext } = mod;
+  return {
+    ...mod,
+    DndContext: (props: Parameters<typeof RealDndContext>[0]) => {
+      capturedOnDragEnd = props.onDragEnd;
+      return React.createElement(RealDndContext, props);
+    },
+  };
+});
 
 const BASE = "http://localhost";
 
@@ -164,6 +180,29 @@ describe("SchedulePage", () => {
     // Click Today — goes back to current month
     await user.click(screen.getByRole("button", { name: "Today" }));
     expect(heading.nextElementSibling?.textContent).toBe(currentMonthLabel);
+  });
+
+  it("calls PATCH /shifts/:id when a shift is dragged to a different day", async () => {
+    let patchCalled = false;
+    server.use(
+      http.get(`${BASE}/api/v1/shifts`, () => HttpResponse.json([mockShift])),
+      http.patch(`${BASE}/api/v1/shifts/:id`, () => {
+        patchCalled = true;
+        return HttpResponse.json({ id: 1 });
+      }),
+    );
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+    await screen.findByText("Mark Stevens"); // shifts loaded
+
+    // Simulate drag: mockShift is on 2026-06-16, dropped on 2026-06-17
+    act(() => {
+      capturedOnDragEnd?.({
+        active: { id: mockShift.id },
+        over: { id: "2026-06-17" },
+      } as unknown as DragEndEvent);
+    });
+
+    await waitFor(() => expect(patchCalled).toBe(true));
   });
 
   it("deletes a shift when the Delete shift button is clicked", async () => {

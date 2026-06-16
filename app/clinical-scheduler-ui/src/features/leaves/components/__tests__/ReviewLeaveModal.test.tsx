@@ -200,4 +200,44 @@ describe("ReviewLeaveModal", () => {
     await user.click(screen.getByRole("button", { name: /Approve/ }));
     await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
   });
+
+  it("shows '1 day' (singular) when durationDays is 1", () => {
+    const oneDayLeave: typeof mockLeaveRequest = {
+      ...mockLeaveRequest,
+      durationDays: 1,
+      endDate: "2024-03-01",
+    };
+    renderWithProviders(
+      <ReviewLeaveModal
+        leave={oneDayLeave}
+        canReview={false}
+        onClose={vi.fn()}
+      />,
+      { user: mockUser },
+    );
+    expect(screen.getByText("1 day")).toBeInTheDocument();
+  });
+
+  it("falls back to the raw action text for unknown audit actions", () => {
+    const leaveWithUnknownAction: typeof mockApprovedLeave = {
+      ...mockApprovedLeave,
+      auditEntries: [
+        {
+          at: "2024-02-10T10:00:00Z",
+          by: "System",
+          action: "auto_processed", // not in ACTION_LABEL
+          note: null,
+        },
+      ],
+    };
+    renderWithProviders(
+      <ReviewLeaveModal
+        leave={leaveWithUnknownAction}
+        canReview={false}
+        onClose={vi.fn()}
+      />,
+      { user: mockUser },
+    );
+    expect(screen.getByText(/auto_processed/)).toBeInTheDocument();
+  });
 });

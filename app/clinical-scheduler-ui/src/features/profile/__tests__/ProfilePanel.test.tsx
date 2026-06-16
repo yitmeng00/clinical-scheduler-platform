@@ -169,6 +169,35 @@ describe("ProfilePanel", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
+  it("shows 'Current password is incorrect.' when the password change API returns an error", async () => {
+    server.use(
+      http.put(
+        `${BASE}/api/v1/profile/password`,
+        () => new HttpResponse(null, { status: 401 }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderPanel();
+    await screen.findByText("Mark Stevens");
+    await user.click(screen.getByRole("button", { name: /Password/ }));
+    await user.type(
+      screen.getByPlaceholderText("Enter current password"),
+      "wrongpassword",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Min. 6 characters"),
+      "newpassword",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Re-enter new password"),
+      "newpassword",
+    );
+    await user.click(screen.getByRole("button", { name: "Change Password" }));
+    expect(
+      await screen.findByText("Current password is incorrect."),
+    ).toBeInTheDocument();
+  });
+
   it("shows an error when the profile endpoint fails", async () => {
     server.use(
       http.get(

@@ -88,4 +88,22 @@ describe("OvertimePage", () => {
     await user.click(screen.getByRole("button", { name: "Next week" }));
     expect(weekLabel.textContent).not.toBe(initialText);
   });
+
+  it("shows '—' dash and accent avatar for a non-overtime staff member", async () => {
+    const nonOvertimeRecord = {
+      ...mockOvertimeRecord,
+      isOvertime: false,
+      overtimeHours: 0,
+      totalHours: 38,
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/overtime`, () =>
+        HttpResponse.json([nonOvertimeRecord]),
+      ),
+    );
+    renderWithProviders(<OvertimePage />, { user: mockAdminUser });
+    await screen.findByText("Mark Stevens");
+    // Non-overtime staff show "—" in the overtime column
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
 });
