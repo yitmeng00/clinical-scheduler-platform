@@ -109,6 +109,7 @@ export default function OvertimePage() {
       {/* Week navigation */}
       <div className="flex items-center gap-3 mb-5">
         <button
+          aria-label="Previous week"
           onClick={() => setWeekStart((w) => addDays(w, -7))}
           className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
         >
@@ -118,6 +119,7 @@ export default function OvertimePage() {
           Week of {formatWeekLabel(weekStart)}
         </span>
         <button
+          aria-label="Next week"
           onClick={() => setWeekStart((w) => addDays(w, 7))}
           className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
         >
