@@ -81,6 +81,7 @@ export default function CreateShiftModal({
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-slate-900">New Shift</h2>
           <button
+            aria-label="Close"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >

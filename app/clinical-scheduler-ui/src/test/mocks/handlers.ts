@@ -54,12 +54,14 @@ export const handlers = [
   http.patch(`${BASE}/api/v1/staff/:id/toggle-active`, () =>
     HttpResponse.json(mockStaffMember),
   ),
-  http.post(`${BASE}/api/v1/staff/:id/reset-password`, () =>
-    new HttpResponse(null, { status: 204 }),
+  http.post(
+    `${BASE}/api/v1/staff/:id/reset-password`,
+    () => new HttpResponse(null, { status: 204 }),
   ),
 
   // Leaves
   http.get(`${BASE}/api/v1/leaves`, () => HttpResponse.json([])),
+  http.get(`${BASE}/api/v1/leaves/approved`, () => HttpResponse.json([])),
   http.post(`${BASE}/api/v1/leaves`, () =>
     HttpResponse.json({ id: 1 }, { status: 201 }),
   ),
@@ -76,7 +78,7 @@ export const handlers = [
   http.post(`${BASE}/api/v1/shifts`, () =>
     HttpResponse.json({ id: 1 }, { status: 201 }),
   ),
-  http.put(`${BASE}/api/v1/shifts/:id`, () => HttpResponse.json({ id: 1 })),
+  http.patch(`${BASE}/api/v1/shifts/:id`, () => HttpResponse.json({ id: 1 })),
   http.delete(
     `${BASE}/api/v1/shifts/:id`,
     () => new HttpResponse(null, { status: 204 }),

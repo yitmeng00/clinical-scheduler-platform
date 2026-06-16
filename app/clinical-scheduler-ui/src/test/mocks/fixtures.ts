@@ -5,6 +5,7 @@ import type {
   TodayShift,
 } from "../../types/dashboard";
 import type { LeaveRequest } from "../../types/leave";
+import type { Shift } from "../../types/shift";
 import type { Department, StaffMember } from "../../types/user";
 
 export const mockUser: AuthUser = {
@@ -119,8 +120,18 @@ export const mockApprovedLeave: LeaveRequest = {
   reviewedAt: "2024-02-11T10:00:00Z",
   reviewNote: "Approved as requested",
   auditEntries: [
-    { at: "2024-02-10T10:00:00Z", by: "Mark Stevens", action: "submitted", note: null },
-    { at: "2024-02-11T10:00:00Z", by: "Admin User", action: "approved", note: "Approved as requested" },
+    {
+      at: "2024-02-10T10:00:00Z",
+      by: "Mark Stevens",
+      action: "submitted",
+      note: null,
+    },
+    {
+      at: "2024-02-11T10:00:00Z",
+      by: "Admin User",
+      action: "approved",
+      note: "Approved as requested",
+    },
   ],
 };
 
@@ -136,6 +147,18 @@ export const mockStaffMember2: StaffMember = {
   initials: "EW",
   employmentType: "FullTime",
   createdAt: "2024-01-01T00:00:00Z",
+};
+
+export const mockShift: Shift = {
+  id: 1,
+  staffId: 8,
+  staffName: "Mark Stevens",
+  staffInitials: "MS",
+  departmentId: 5,
+  departmentName: "Front Desk",
+  startTime: "2026-06-16T07:00:00Z",
+  endTime: "2026-06-16T15:00:00Z",
+  shiftType: "Morning",
 };
 
 export const mockInactiveStaff: StaffMember = {
