@@ -1,10 +1,14 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import { mockStaffMember, mockUser } from "../../../../test/mocks/fixtures";
+import { server } from "../../../../test/mocks/server";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
 import ResetPasswordModal from "../ResetPasswordModal";
+
+const BASE = "http://localhost";
 
 function renderModal(onClose = vi.fn()) {
   return renderWithProviders(
@@ -129,5 +133,28 @@ describe("ResetPasswordModal", () => {
     );
     await user.click(container.firstChild as Element);
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it("shows an error message when the reset password API fails", async () => {
+    server.use(
+      http.post(
+        `${BASE}/api/v1/staff/:id/reset-password`,
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderModal();
+    await user.type(
+      screen.getByPlaceholderText("Min. 6 characters"),
+      "newpassword",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Re-enter password"),
+      "newpassword",
+    );
+    await user.click(screen.getByRole("button", { name: "Reset Password" }));
+    expect(
+      await screen.findByText("Failed to reset password. Please try again."),
+    ).toBeInTheDocument();
   });
 });

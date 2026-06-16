@@ -1,10 +1,14 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import { mockUser, mockStaffMember } from "../../../../test/mocks/fixtures";
+import { server } from "../../../../test/mocks/server";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
 import StaffFormModal from "../StaffFormModal";
+
+const BASE = "http://localhost";
 
 describe("StaffFormModal — add mode", () => {
   it("renders the Add Staff Member heading", () => {
@@ -87,6 +91,82 @@ describe("StaffFormModal — add mode", () => {
     });
     await user.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalledOnce();
+  });
+});
+
+describe("StaffFormModal — field interactions", () => {
+  it("updates the role when a different option is selected", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
+      user: mockUser,
+    });
+    await user.selectOptions(
+      screen.getByDisplayValue("Nurse"),
+      screen.getByRole("option", { name: "Doctor" }),
+    );
+    expect(screen.getByDisplayValue("Doctor")).toBeInTheDocument();
+  });
+
+  it("updates the department when a different option is selected", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
+      user: mockUser,
+    });
+    const cardOption = await screen.findByRole("option", {
+      name: "Cardiology",
+    });
+    await user.selectOptions(cardOption.closest("select")!, cardOption);
+    expect(cardOption.closest("select")).toHaveValue("2");
+  });
+
+  it("updates the phone field when typed", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
+      user: mockUser,
+    });
+    await user.type(screen.getByPlaceholderText("555-0100"), "555-9999");
+    expect(screen.getByDisplayValue("555-9999")).toBeInTheDocument();
+  });
+
+  it("updates the employment type when a different option is selected", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
+      user: mockUser,
+    });
+    const partTimeOption = screen.getByRole("option", { name: "Part Time" });
+    await user.selectOptions(partTimeOption.closest("select")!, partTimeOption);
+    expect((partTimeOption as HTMLOptionElement).selected).toBe(true);
+  });
+
+  it("shows an error message when the create API fails", async () => {
+    server.use(
+      http.post(
+        `${BASE}/api/v1/staff`,
+        () => new HttpResponse(null, { status: 409 }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<StaffFormModal onClose={vi.fn()} />, {
+      user: mockUser,
+    });
+    await user.type(
+      screen.getByPlaceholderText("e.g. Dr. Jane Smith"),
+      "Jane Smith",
+    );
+    await user.type(
+      screen.getByPlaceholderText("jane.smith@hospital.org"),
+      "jane@hospital.org",
+    );
+    await user.type(
+      screen.getByPlaceholderText("Temporary password"),
+      "password123",
+    );
+    await user.click(screen.getByRole("button", { name: "Add Staff" }));
+    expect(
+      await screen.findByText(
+        "Failed to save. The email may already be in use.",
+      ),
+    ).toBeInTheDocument();
   });
 });
 

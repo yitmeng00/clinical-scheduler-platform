@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -230,5 +230,87 @@ describe("StaffPage", () => {
     expect(
       screen.getByRole("heading", { name: "Reset Password" }),
     ).toBeInTheDocument();
+  });
+
+  it("calls PATCH toggle-active when the Deactivate button is clicked", async () => {
+    let patchCalled = false;
+    server.use(
+      http.get(`${BASE}/api/v1/staff/management`, () =>
+        HttpResponse.json([mockStaffMember]),
+      ),
+      http.patch(`${BASE}/api/v1/staff/:id/toggle-active`, () => {
+        patchCalled = true;
+        return HttpResponse.json({ ...mockStaffMember, isActive: false });
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<StaffPage />, { user: mockAdminUser });
+    await user.click(await screen.findByRole("button", { name: "Deactivate" }));
+    await waitFor(() => expect(patchCalled).toBe(true));
+  });
+
+  it("closes Add Staff modal when Cancel is clicked inside it", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<StaffPage />, { user: mockAdminUser });
+    await user.click(screen.getByRole("button", { name: /Add Staff/ }));
+    expect(
+      screen.getByRole("heading", { name: "Add Staff Member" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByRole("heading", { name: "Add Staff Member" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes Edit Staff modal when Cancel is clicked inside it", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/staff/management`, () =>
+        HttpResponse.json([mockStaffMember]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<StaffPage />, { user: mockAdminUser });
+    await user.click(await screen.findByRole("button", { name: "Edit" }));
+    expect(
+      screen.getByRole("heading", { name: "Edit Staff Member" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByRole("heading", { name: "Edit Staff Member" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("closes Reset Password modal when Cancel is clicked inside it", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/staff/management`, () =>
+        HttpResponse.json([mockStaffMember]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<StaffPage />, { user: mockAdminUser });
+    await user.click(
+      await screen.findByRole("button", { name: "Reset password" }),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Reset Password" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(
+      screen.queryByRole("heading", { name: "Reset Password" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders fallback style for an unknown role and employment type", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/staff/management`, () =>
+        HttpResponse.json([
+          { ...mockStaffMember, role: "Volunteer", employmentType: "Casual" },
+        ]),
+      ),
+    );
+    renderWithProviders(<StaffPage />, { user: mockAdminUser });
+    await screen.findByText("Mark Stevens");
+    expect(screen.getByText("Volunteer")).toBeInTheDocument();
+    expect(screen.getByText("Casual")).toBeInTheDocument();
   });
 });
