@@ -106,4 +106,53 @@ describe("OvertimePage", () => {
     // Non-overtime staff show "—" in the overtime column
     expect(screen.getByText("—")).toBeInTheDocument();
   });
+
+  it("navigates to the previous week when Previous week is clicked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<OvertimePage />, { user: mockAdminUser });
+    const weekLabel = screen.getByText(/Week of/);
+    const initialText = weekLabel.textContent;
+    await user.click(screen.getByRole("button", { name: "Previous week" }));
+    expect(weekLabel.textContent).not.toBe(initialText);
+  });
+
+  it("shows plural 'staff members' in the header when more than one has overtime", async () => {
+    const secondRecord = {
+      ...mockOvertimeRecord,
+      staffId: 9,
+      fullName: "Jane Doe",
+      initials: "JD",
+    };
+    server.use(
+      http.get(`${BASE}/api/v1/overtime`, () =>
+        HttpResponse.json([mockOvertimeRecord, secondRecord]),
+      ),
+    );
+    renderWithProviders(<OvertimePage />, { user: mockAdminUser });
+    expect(
+      await screen.findByText("2 staff members with overtime this week"),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to raw role text for an unknown role value", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/overtime`, () =>
+        HttpResponse.json([{ ...mockOvertimeRecord, role: "Volunteer" }]),
+      ),
+    );
+    renderWithProviders(<OvertimePage />, { user: mockAdminUser });
+    expect(await screen.findByText("Volunteer")).toBeInTheDocument();
+  });
+
+  it("falls back to raw employment type text for an unknown employment type", async () => {
+    server.use(
+      http.get(`${BASE}/api/v1/overtime`, () =>
+        HttpResponse.json([
+          { ...mockOvertimeRecord, employmentType: "Casual" },
+        ]),
+      ),
+    );
+    renderWithProviders(<OvertimePage />, { user: mockAdminUser });
+    expect(await screen.findByText("Casual")).toBeInTheDocument();
+  });
 });
