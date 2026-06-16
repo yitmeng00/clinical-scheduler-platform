@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -115,5 +115,77 @@ describe("SchedulePage", () => {
     await user.click(nextBtn);
     const newLabel = heading.nextElementSibling?.textContent;
     expect(newLabel).not.toBe(initialLabel);
+  });
+
+  it("navigates to the previous month when Previous is clicked in month view", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByText("Mon");
+
+    const heading = screen.getByRole("heading", { name: "Schedule" });
+    const initialLabel = heading.nextElementSibling?.textContent;
+
+    await user.click(screen.getByRole("button", { name: "Previous" }));
+
+    expect(heading.nextElementSibling?.textContent).not.toBe(initialLabel);
+  });
+
+  it("navigates to the next month when Next is clicked in month view", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByText("Mon");
+
+    const heading = screen.getByRole("heading", { name: "Schedule" });
+    const initialLabel = heading.nextElementSibling?.textContent;
+
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(heading.nextElementSibling?.textContent).not.toBe(initialLabel);
+  });
+
+  it("returns to the current month when Today is clicked after navigating away", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+
+    await user.click(screen.getByRole("button", { name: "Month" }));
+    await screen.findByText("Mon");
+
+    const heading = screen.getByRole("heading", { name: "Schedule" });
+    const currentMonthLabel = heading.nextElementSibling?.textContent;
+
+    // Navigate away
+    await user.click(screen.getByRole("button", { name: "Previous" }));
+    expect(heading.nextElementSibling?.textContent).not.toBe(currentMonthLabel);
+
+    // Click Today — goes back to current month
+    await user.click(screen.getByRole("button", { name: "Today" }));
+    expect(heading.nextElementSibling?.textContent).toBe(currentMonthLabel);
+  });
+
+  it("deletes a shift when the Delete shift button is clicked", async () => {
+    // Stateful handler: after DELETE the list becomes empty so refetch returns []
+    let shiftsData = [mockShift];
+    server.use(
+      http.get(`${BASE}/api/v1/shifts`, () => HttpResponse.json(shiftsData)),
+      http.delete(`${BASE}/api/v1/shifts/:id`, () => {
+        shiftsData = [];
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<SchedulePage />, { user: mockAdminUser });
+
+    expect(await screen.findByText("Mark Stevens")).toBeInTheDocument();
+
+    // Delete shift button has aria-label="Delete shift" (accessible in jsdom despite CSS hidden)
+    await user.click(screen.getByRole("button", { name: "Delete shift" }));
+
+    await waitFor(() =>
+      expect(screen.queryByText("Mark Stevens")).not.toBeInTheDocument(),
+    );
   });
 });
