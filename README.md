@@ -39,43 +39,27 @@ CareShift addresses the operational challenges of managing clinical staff across
 
 ## 2. Screenshots
 
-> Place screenshot files in `docs/screenshots/` and they will render here automatically.
-
-### Dashboard
-
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Schedule — Weekly View
-
-![Schedule](docs/screenshots/schedule.png)
-
-### Leave Requests
-
-![Leave Requests](docs/screenshots/leaves.png)
-
-### Shift Swaps
-
-![Shift Swaps](docs/screenshots/swaps.png)
-
-### Staff Management
-
-![Staff Management](docs/screenshots/staff.png)
-
-### Overtime Tracker
-
-![Overtime Tracker](docs/screenshots/overtime.png)
-
-### Audit Log
-
-![Audit Log](docs/screenshots/audit.png)
-
-### Profile
-
-![Profile](docs/screenshots/profile.png)
-
-### Notifications
-
-![Notification](docs/screenshots/notification.png)
+<table>
+  <tr>
+    <td width="50%"><strong>Dashboard</strong><br/><img src="docs/screenshots/dashboard.png" width="100%"/></td>
+    <td width="50%"><strong>Schedule — Weekly View</strong><br/><img src="docs/screenshots/schedule.png" width="100%"/></td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>Leave Requests</strong><br/><img src="docs/screenshots/leaves.png" width="100%"/></td>
+    <td width="50%"><strong>Shift Swaps</strong><br/><img src="docs/screenshots/swaps.png" width="100%"/></td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>Staff Management</strong><br/><img src="docs/screenshots/staff.png" width="100%"/></td>
+    <td width="50%"><strong>Overtime Tracker</strong><br/><img src="docs/screenshots/overtime.png" width="100%"/></td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>Audit Log</strong><br/><img src="docs/screenshots/audit.png" width="100%"/></td>
+    <td width="50%"><strong>Profile</strong><br/><img src="docs/screenshots/profile.png" width="100%"/></td>
+  </tr>
+  <tr>
+    <td width="100%" colspan="2"><strong>Notifications</strong><br/><img src="docs/screenshots/notification.png" width="100%"/></td>
+  </tr>
+</table>
 
 ---
 
