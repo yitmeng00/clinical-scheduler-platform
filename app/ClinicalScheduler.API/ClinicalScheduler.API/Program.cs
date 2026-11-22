@@ -23,7 +23,7 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.ReportApiVersions = true;
-});
+}).AddMvc();
 builder.Services.AddSignalR();
 
 // JWT Authentication
