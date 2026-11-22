@@ -4,7 +4,7 @@ import {
   Request as UndiciRequest,
   Response,
 } from "undici";
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
 import { afterAll, afterEach, beforeAll } from "vitest";
 
 // RTK Query's fetchBaseQuery uses relative paths (e.g. /api/v1/departments).
@@ -36,6 +36,6 @@ Object.assign(globalThis, { fetch, Headers, Request, Response });
 
 import { server } from "./mocks/server";
 
-beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+beforeAll(() => server.listen({ onUnhandledFrame: "warn" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
