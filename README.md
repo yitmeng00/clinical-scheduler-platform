@@ -125,7 +125,7 @@ The backend is organized into four projects with strict inward-only dependency r
 
 **CQRS pattern:** Every operation is a discrete `IRequest` handled by a matching `IRequestHandler`. Commands mutate state; Queries return data. MediatR auto-discovers and wires all handlers at startup.
 
-**Exception handling:** A single `ExceptionHandlingMiddleware` converts domain exceptions (`NotFoundException`, `UnauthorizedException`, `ConflictException`, `ForbiddenException`) into appropriate HTTP responses with no try/catch in controllers.
+**Exception handling:** A single `ExceptionHandlingMiddleware` converts application exceptions into HTTP responses with no try/catch in controllers: `ValidationException` → 422 (with per-field errors from FluentValidation), `UnauthorizedException` → 401, `ForbiddenException` → 403, `NotFoundException` → 404, `ConflictException` → 409.
 
 ### Frontend — Feature-Sliced Architecture
 
@@ -155,6 +155,7 @@ clinical-scheduler-platform/
 │   │   ├── ClinicalScheduler.Domain/         # Entities, Enums
 │   │   └── ClinicalScheduler.Infrastructure/ # EF Core, Services, Migrations
 │   └── clinical-scheduler-ui/               # React 19 SPA
+│       ├── e2e/                             # Playwright end-to-end tests
 │       ├── public/
 │       └── src/
 │           ├── app/
@@ -172,10 +173,13 @@ clinical-scheduler-platform/
 │           │   └── swaps/
 │           ├── services/
 │           ├── signalr/
+│           ├── test/                        # Vitest setup, MSW handlers, fixtures
 │           ├── types/
 │           └── utils/
 ├── database/
+│   ├── schema.sql
 │   └── seed.sql
+├── ClinicalScheduler.slnx
 └── README.md
 ```
 
@@ -426,7 +430,7 @@ The notification bell in the top bar shows an unread badge count. Clicking it op
 
 ## 12. API Reference
 
-All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` require a valid JWT Bearer token.
+All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` and `/auth/refresh` require a valid JWT Bearer token. Responses include an `api-supported-versions` header.
 
 ### Auth
 
@@ -438,11 +442,11 @@ All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` re
 
 ### Dashboard
 
-| Method | Endpoint                    | Access   | Description                |
-| ------ | --------------------------- | -------- | -------------------------- |
-| `GET`  | `/dashboard/stats`          | All      | Stat card counts           |
-| `GET`  | `/dashboard/today-shifts`   | All      | Today's scheduled shifts   |
-| `GET`  | `/dashboard/pending-leaves` | Reviewer | Pending leave request list |
+| Method | Endpoint                    | Access          | Description                |
+| ------ | --------------------------- | --------------- | -------------------------- |
+| `GET`  | `/dashboard/stats`          | All             | Stat card counts           |
+| `GET`  | `/dashboard/today-shifts`   | All             | Today's scheduled shifts   |
+| `GET`  | `/dashboard/pending-leaves` | Admin, DeptLead | Pending leave request list |
 
 ### Shifts
 
@@ -478,6 +482,7 @@ All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` re
 
 | Method  | Endpoint                     | Access          | Description                        |
 | ------- | ---------------------------- | --------------- | ---------------------------------- |
+| `GET`   | `/staff`                     | Authenticated   | Active staff list                  |
 | `GET`   | `/staff/management`          | Admin, DeptLead | Full staff list including inactive |
 | `POST`  | `/staff`                     | Admin           | Create staff account               |
 | `PUT`   | `/staff/{id}`                | Admin           | Update staff profile               |
@@ -503,31 +508,41 @@ All endpoints are versioned under `/api/v1/`. All routes except `/auth/login` re
 
 ## 13. Testing
 
-The frontend test suite uses **Vitest 3** + **React Testing Library** + **MSW v2** (node mode). Tests exercise components end-to-end through the real Redux store and RTK Query layer — no mocked modules, no shallow rendering.
+The frontend test suite uses **Vitest 5** + **React Testing Library** + **MSW v3** (node mode). Tests exercise components end-to-end through the real Redux store and RTK Query layer — no mocked modules, no shallow rendering. A small **Playwright** suite covers key flows in a real browser.
 
 ### Stack
 
 | Tool                          | Role                                                         |
 | ----------------------------- | ------------------------------------------------------------ |
-| Vitest 3 + jsdom              | Test runner and DOM environment                              |
+| Vitest 5 + jsdom              | Test runner and DOM environment                              |
 | React Testing Library         | Component rendering and user-event simulation                |
-| MSW v2 (node)                 | Intercept HTTP at the network layer; no `fetch` mocks needed |
+| `@testing-library/jest-dom`   | DOM matchers (`toBeInTheDocument`, `toHaveValue`, …)         |
+| MSW v3 (node)                 | Intercept HTTP at the network layer; no `fetch` mocks needed |
 | `@testing-library/user-event` | Realistic browser-like interaction (type, click, select)     |
 | `@vitest/coverage-v8`         | V8-native coverage with Istanbul branch tracking             |
+| Playwright                    | End-to-end tests in Chromium (API mocked via `page.route`)   |
 
 ### Running the tests
 
 ```bash
 cd app/clinical-scheduler-ui
 
-# Run all tests
+# Run all unit/integration tests (watch mode)
 npm run test
+
+# Run once (CI)
+npm run test:run
 
 # Run with coverage report
 npm run test:coverage
 
 # Run a specific feature
 npx vitest run src/features/swaps
+
+# End-to-end tests (starts the Vite dev server automatically)
+npx playwright install chromium   # first run, or after upgrading Playwright
+npm run test:e2e
+npm run test:e2e:ui               # interactive mode
 ```
 
 ### Coverage target
@@ -631,17 +646,17 @@ All files                      |   99.84 |    98.23 |   99.53 |   99.84 |
 ### Prerequisites
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Node.js 20+](https://nodejs.org/)
+- [Node.js 24.15+ or 22.22.2+](https://nodejs.org/) (required by the Vitest 5 / jsdom test toolchain)
 - [PostgreSQL 15+](https://www.postgresql.org/)
 
 ### 1 — Database
 
-Create a PostgreSQL database and update the connection string in `app/ClinicalScheduler.API/ClinicalScheduler.API/appsettings.Development.json`:
+Start PostgreSQL. The default connection string in `app/ClinicalScheduler.API/ClinicalScheduler.API/appsettings.json` points to a local `clinical_scheduler` database with the `postgres` / `postgres` user. To use different settings, override them in `appsettings.Development.json` (or via environment variables):
 
 ```json
 {
     "ConnectionStrings": {
-        "DefaultConnection": "Host=localhost;Database=careshift;Username=postgres;Password=yourpassword"
+        "DefaultConnection": "Host=localhost;Port=5432;Database=clinical_scheduler;Username=postgres;Password=yourpassword"
     },
     "JwtSettings": {
         "SecretKey": "your-secret-key-min-32-chars",
@@ -661,17 +676,17 @@ dotnet run --project ClinicalScheduler.API
 
 On first startup, EF Core applies all pending migrations and the `DbSeeder` populates the database with departments, staff accounts, and sample data automatically.
 
-The API is available at `https://localhost:5001`. OpenAPI docs at `https://localhost:5001/openapi/v1.json` (development only).
+The API is available at `http://localhost:5172` (or `https://localhost:7135` with `--launch-profile https`). OpenAPI docs at `http://localhost:5172/openapi/v1.json` (Development environment only).
 
 ### 3 — Frontend
 
 ```bash
 cd app/clinical-scheduler-ui
-npm install
+npm ci
 npm run dev
 ```
 
-The UI is available at `http://localhost:5173`. The Vite dev server proxies `/api` and `/hubs` to the .NET backend.
+The UI is available at `http://localhost:5173`. The Vite dev server proxies `/api` and `/hubs` (including WebSockets) to the .NET backend at `http://localhost:5172`.
 
 ### Default Seed Accounts
 
@@ -697,6 +712,8 @@ npm run build          # outputs to dist/
 cd app/ClinicalScheduler.API
 dotnet publish -c Release
 ```
+
+To try the production build locally, run the published API with `ASPNETCORE_ENVIRONMENT=Production` and serve the frontend with `npm run preview` (`http://localhost:4173`, which uses the same `/api` and `/hubs` proxy and is already allowed by the CORS policy).
 
 The frontend `dist/` folder can be served as static files from the .NET host or a separate CDN. Update the CORS policy in `Program.cs` with the production frontend origin before deploying.
 
