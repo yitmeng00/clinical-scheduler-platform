@@ -1,75 +1,58 @@
-# React + TypeScript + Vite
+# CareShift UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript single-page app for the CareShift clinical staff scheduler. For the full project overview, architecture, API reference and backend setup, see the [root README](../../README.md).
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 24.15+ or 22.22.2+
+- The ASP.NET Core API running on `http://localhost:5172` (see the root README)
 
-## React Compiler
+## Getting started
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm ci
+npm run dev        # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The Vite dev server proxies `/api` and `/hubs` (including WebSockets) to the API, so the app always uses relative URLs. Sign in with one of the seed accounts listed in the root README.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Script                  | Description                                                 |
+| ----------------------- | ----------------------------------------------------------- |
+| `npm run dev`           | Start the Vite dev server with HMR                          |
+| `npm run build`         | Type-check (`tsc -b`) and build for production into `dist/` |
+| `npm run preview`       | Serve the production build on `http://localhost:4173`       |
+| `npm run lint`          | Run ESLint                                                  |
+| `npm run test`          | Run Vitest in watch mode                                    |
+| `npm run test:run`      | Run Vitest once                                             |
+| `npm run test:coverage` | Run Vitest with V8 coverage                                 |
+| `npm run test:e2e`      | Run Playwright end-to-end tests                             |
+| `npm run test:e2e:ui`   | Run Playwright in interactive UI mode                       |
+
+Before the first E2E run (or after upgrading Playwright), install the browser with `npx playwright install chromium`.
+
+## Tooling notes
+
+- **Build:** Vite 8 (Rolldown) with `@vitejs/plugin-react` and Tailwind CSS v4 via `@tailwindcss/vite`.
+- **React Compiler:** enabled through `@rolldown/plugin-babel` with `reactCompilerPreset()` in `vite.config.ts`. Components are memoized automatically, so manual `useMemo` / `useCallback` is rarely needed.
+- **Tests:** Vitest 5 + jsdom + React Testing Library. MSW v3 intercepts HTTP in `src/test/mocks/`, and `src/test/setup.ts` registers the `@testing-library/jest-dom/vitest` matchers.
+- **Linting:** ESLint 9 flat config (`eslint.config.js`) with `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh` and `eslint-plugin-import` (import ordering).
+
+## Project layout
+
+```
+src/
+├── app/          # Redux store, typed hooks, router
+├── components/   # Shared layout and UI components
+├── constants/    # Static config (sidebar navigation)
+├── features/     # Feature modules (page, components, RTK Query endpoints)
+├── hooks/        # Shared hooks
+├── schemas/      # Zod form schemas
+├── services/     # Base RTK Query API (with token refresh) and shared endpoints
+├── signalr/      # Hub connection and useSignalR hook
+├── test/         # Vitest setup, MSW handlers, fixtures, render helpers
+├── types/        # Shared TypeScript types
+└── utils/        # Pure utility functions
+e2e/              # Playwright specs
 ```
