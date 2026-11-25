@@ -22,7 +22,6 @@ export default defineConfig({
         "src/main.tsx",
         "src/app/router.tsx",
         "src/app/store.ts",
-        "src/App.tsx",
         // Pure type definitions
         "src/types/**",
         // Static constant data — no branches to cover

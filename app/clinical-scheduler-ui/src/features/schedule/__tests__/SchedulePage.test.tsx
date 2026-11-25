@@ -279,17 +279,17 @@ describe("SchedulePage", () => {
     // Wait for department options (staff list loaded → useMemo runs → dept map built)
     await screen.findByRole("option", { name: "Front Desk" });
 
-    // Select a department: covers line 170 truthy branch + lines 56-57 + 176-178
+    // Filter by a department
     await user.selectOptions(
       screen.getByDisplayValue("All departments"),
       screen.getByRole("option", { name: "Front Desk" }),
     );
 
-    // Switch to month view while dept is selected → covers shiftsApi line 35
+    // Month view should keep the department filter
     await user.click(screen.getByRole("button", { name: "Month" }));
     await screen.findByText("Mon");
 
-    // Clear the filter: covers line 170 falsy branch → undefined
+    // Clear the filter back to all departments
     await user.selectOptions(
       screen.getByDisplayValue("Front Desk"),
       screen.getByRole("option", { name: "All departments" }),
