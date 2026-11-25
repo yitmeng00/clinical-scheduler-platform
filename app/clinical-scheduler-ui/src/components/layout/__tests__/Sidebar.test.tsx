@@ -70,14 +70,38 @@ describe("Sidebar", () => {
     expect(screen.getByText("Receptionist")).toBeInTheDocument();
   });
 
-  it("dispatches logout and navigates to /login when sign-out is clicked", async () => {
+  it("calls the logout API, clears auth and navigates to /login when sign-out is clicked", async () => {
+    let logoutCalled = false;
+    server.use(
+      http.post("http://localhost/api/v1/auth/logout", () => {
+        logoutCalled = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
     const user = userEvent.setup();
     const { store } = renderSidebar();
     await user.click(screen.getByRole("button", { name: "Sign out" }));
-    expect(store.getState().auth.isAuthenticated).toBe(false);
     await waitFor(() =>
       expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true }),
     );
+    expect(logoutCalled).toBe(true);
+    expect(store.getState().auth.isAuthenticated).toBe(false);
+  });
+
+  it("still signs out locally when the logout API fails", async () => {
+    server.use(
+      http.post(
+        "http://localhost/api/v1/auth/logout",
+        () => new HttpResponse(null, { status: 500 }),
+      ),
+    );
+    const user = userEvent.setup();
+    const { store } = renderSidebar();
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() =>
+      expect(mockNavigate).toHaveBeenCalledWith("/login", { replace: true }),
+    );
+    expect(store.getState().auth.isAuthenticated).toBe(false);
   });
 
   it("renders the mobile overlay when mobileOpen is true", () => {
