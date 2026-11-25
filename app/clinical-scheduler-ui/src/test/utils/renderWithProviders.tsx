@@ -1,14 +1,10 @@
-import { configureStore } from "@reduxjs/toolkit";
 import { render, type RenderOptions } from "@testing-library/react";
 import React from "react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
 
-import authReducer from "../../features/auth/authSlice";
-import notificationsReducer, {
-  type AppNotification,
-} from "../../features/notifications/notificationsSlice";
-import { api } from "../../services/api";
+import { setupStore } from "../../app/store";
+import type { AppNotification } from "../../features/notifications/notificationsSlice";
 import type { AuthUser } from "../../types/auth";
 
 interface PreloadedNotificationsState {
@@ -31,22 +27,13 @@ export function renderWithProviders(
 ) {
   const { user = null, token = null, route = "/", preloadedState } = config;
 
-  const store = configureStore({
-    reducer: {
-      [api.reducerPath]: api.reducer,
-      auth: authReducer,
-      notifications: notificationsReducer,
+  const store = setupStore({
+    auth: {
+      token,
+      user,
+      isAuthenticated: !!user,
     },
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(api.middleware),
-    preloadedState: {
-      auth: {
-        token,
-        user,
-        isAuthenticated: !!user,
-      },
-      notifications: preloadedState?.notifications ?? { items: [] },
-    },
+    notifications: preloadedState?.notifications ?? { items: [] },
   });
 
   function Wrapper({ children }: { children: React.ReactNode }) {
