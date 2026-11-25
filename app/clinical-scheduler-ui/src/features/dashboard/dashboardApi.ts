@@ -9,6 +9,7 @@ export const dashboardApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getDashboardStats: builder.query<DashboardStats, void>({
       query: () => "/dashboard/stats",
+      providesTags: ["Leave", "Shift", "Staff"],
     }),
     getTodayShifts: builder.query<TodayShift[], void>({
       query: () => "/dashboard/today-shifts",
