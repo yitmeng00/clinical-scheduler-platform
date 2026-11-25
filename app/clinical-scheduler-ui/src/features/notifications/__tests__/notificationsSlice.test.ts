@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { logout } from "../../auth/authSlice";
 import notificationsReducer, {
   addNotification,
   markAllRead,
@@ -93,6 +94,21 @@ describe("notificationsSlice", () => {
 
     it("is a no-op on an empty list", () => {
       const state = notificationsReducer(empty, markAllRead());
+      expect(state.items).toHaveLength(0);
+    });
+  });
+
+  describe("logout", () => {
+    it("clears all notifications", () => {
+      let state = notificationsReducer(
+        empty,
+        addNotification({ message: "Shift assigned", type: "info" }),
+      );
+      state = notificationsReducer(
+        state,
+        addNotification({ message: "Leave approved", type: "success" }),
+      );
+      state = notificationsReducer(state, logout());
       expect(state.items).toHaveLength(0);
     });
   });

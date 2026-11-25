@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+import { logout } from "../auth/authSlice";
+
 export interface AppNotification {
   id: string;
   message: string;
@@ -34,6 +36,12 @@ const notificationsSlice = createSlice({
         n.read = true;
       });
     },
+  },
+  extraReducers: (builder) => {
+    // Notifications belong to the signed-in user; clear them on sign-out
+    builder.addCase(logout, (state) => {
+      state.items = [];
+    });
   },
 });
 
