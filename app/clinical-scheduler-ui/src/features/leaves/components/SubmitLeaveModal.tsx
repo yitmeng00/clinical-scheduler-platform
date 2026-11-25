@@ -9,6 +9,7 @@ import {
   LEAVE_TYPES,
   type LeaveType,
 } from "../../../types/leave";
+import { toISODate } from "../../../utils/dateUtils";
 import { useSubmitLeaveMutation } from "../leavesApi";
 
 const schema = z
@@ -29,10 +30,10 @@ interface SubmitLeaveModalProps {
   onClose: () => void;
 }
 
-const today = new Date().toISOString().slice(0, 10);
-
 export default function SubmitLeaveModal({ onClose }: SubmitLeaveModalProps) {
   const [submitLeave, { isLoading }] = useSubmitLeaveMutation();
+  // Local date, computed per render so it stays correct after midnight
+  const today = toISODate(new Date());
 
   const {
     register,

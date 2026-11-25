@@ -3,7 +3,7 @@ import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import React from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   mockAdminUser,
@@ -33,6 +33,11 @@ vi.mock("@dnd-kit/core", async (importOriginal) => {
 const BASE = "http://localhost";
 
 describe("SchedulePage", () => {
+  // Pin today to the week of mockShift (2026-06-16) so it shows in the
+  // current week view and the dates typed below are in the future.
+  beforeEach(() => vi.setSystemTime(new Date("2026-06-16T09:00:00")));
+  afterEach(() => vi.useRealTimers());
+
   it("renders the Schedule heading", () => {
     renderWithProviders(<SchedulePage />, { user: mockAdminUser });
     expect(

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { mockShift } from "../../../../test/mocks/fixtures";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
+import { toISODate } from "../../../../utils/dateUtils";
 import WeeklyGrid from "../WeeklyGrid";
 
 // Capture onDragEnd from DndContext while still rendering the real context so
@@ -96,9 +97,11 @@ describe("WeeklyGrid", () => {
     const onMoveShift = vi.fn();
     renderGrid({ shifts: [mockShift], canEdit: true, onMoveShift });
 
+    // The grid places a shift in the column of its *local* start date, which
+    // depends on the machine's timezone (mockShift.startTime is in UTC).
+    const shiftDay = toISODate(new Date(mockShift.startTime));
     act(() => {
-      // mockShift is on 2026-06-16 → dropping on 2026-06-16 is a no-op
-      capturedOnDragEnd?.(makeDragEvent(mockShift.id, "2026-06-16"));
+      capturedOnDragEnd?.(makeDragEvent(mockShift.id, shiftDay));
     });
 
     expect(onMoveShift).not.toHaveBeenCalled();
