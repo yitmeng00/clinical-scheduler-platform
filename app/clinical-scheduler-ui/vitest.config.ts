@@ -1,11 +1,8 @@
 import { defineConfig } from "vitest/config";
 
-// No React plugin needed — esbuild handles TSX natively.
-// `jsx: "automatic"` uses react/jsx-runtime so components don't need to import React.
+// No React plugin needed: Vite's built-in Oxc transform compiles TSX with the
+// automatic JSX runtime, so components don't need to import React.
 export default defineConfig({
-  esbuild: {
-    jsx: "automatic",
-  },
   test: {
     environment: "jsdom",
     globals: true,

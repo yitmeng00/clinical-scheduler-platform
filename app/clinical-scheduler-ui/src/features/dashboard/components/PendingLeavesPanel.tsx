@@ -1,4 +1,8 @@
 import type { PendingLeave } from "../../../types/dashboard";
+import {
+  formatShortDate,
+  formatShortDateRange,
+} from "../../../utils/dateUtils";
 
 interface PendingLeavesPanelProps {
   leaves?: PendingLeave[];
@@ -25,17 +29,12 @@ function SkeletonRow() {
   );
 }
 
-const formatDateRange = (start: string, end: string, days: number): string => {
-  const s = new Date(start).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-  const e = new Date(end).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-  return start === end ? s : `${s} – ${e} (${days}d)`;
-};
+// formatShortDate* parse "YYYY-MM-DD" as local midnight; `new Date("YYYY-MM-DD")`
+// would parse it as UTC and show the previous day for users west of UTC.
+const formatDateRange = (start: string, end: string, days: number): string =>
+  start === end
+    ? formatShortDate(start)
+    : `${formatShortDateRange(start, end)} (${days}d)`;
 
 export default function PendingLeavesPanel({
   leaves,

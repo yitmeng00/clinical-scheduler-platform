@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   mockAdminUser,
@@ -36,6 +36,10 @@ function renderModal(
 }
 
 describe("CreateShiftModal", () => {
+  // Pin today so the hardcoded shift dates below are in the future.
+  beforeEach(() => vi.setSystemTime(new Date("2026-06-16T09:00:00")));
+  afterEach(() => vi.useRealTimers());
+
   it("renders the 'New Shift' heading", () => {
     renderModal();
     expect(

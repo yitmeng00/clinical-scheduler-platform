@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockUser } from "../../../../test/mocks/fixtures";
 import { server } from "../../../../test/mocks/server";
@@ -17,6 +17,10 @@ function renderModal(onClose = vi.fn()) {
 }
 
 describe("SubmitLeaveModal", () => {
+  // Pin today so the hardcoded leave dates below are in the future.
+  beforeEach(() => vi.setSystemTime(new Date("2026-06-16T09:00:00")));
+  afterEach(() => vi.useRealTimers());
+
   it("renders the Request Leave heading", () => {
     renderModal();
     expect(

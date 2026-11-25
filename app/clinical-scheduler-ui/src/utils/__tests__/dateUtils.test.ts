@@ -97,8 +97,8 @@ describe("formatLongDateRange", () => {
 
 describe("formatDateTime", () => {
   it("includes the month abbreviation and day", () => {
-    // Use a fixed UTC time; toLocaleString output depends on locale
-    const result = formatDateTime("2024-01-15T14:30:00Z");
+    // Build the instant from local time so "Jan 15" holds in any timezone
+    const result = formatDateTime(new Date(2024, 0, 15, 14, 30).toISOString());
     expect(result).toMatch(/Jan 15/);
   });
 
