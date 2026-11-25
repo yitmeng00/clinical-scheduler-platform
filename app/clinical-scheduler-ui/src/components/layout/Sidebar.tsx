@@ -5,6 +5,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { NAV_ITEMS, ROLE_LABELS } from "../../constants/navbar";
+import { useLogoutMutation } from "../../features/auth/authApi";
 import { logout } from "../../features/auth/authSlice";
 import {
   selectPendingCount,
@@ -53,12 +54,19 @@ function SidebarContent({ onNavClick }: SidebarContentProps) {
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [logoutRequest, { isLoading: isLoggingOut }] = useLogoutMutation();
 
   if (!user) return null;
 
   const visibleNav = NAV_ITEMS.filter((n) => n.roles.includes(user.role));
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Revoke the refresh token server-side and clear its httpOnly cookie
+      await logoutRequest().unwrap();
+    } catch {
+      // Still sign out locally if the server can't be reached
+    }
     dispatch(logout());
     navigate("/login", { replace: true });
   };
@@ -125,8 +133,9 @@ function SidebarContent({ onNavClick }: SidebarContentProps) {
           </button>
           <button
             onClick={handleLogout}
+            disabled={isLoggingOut}
             title="Sign out"
-            className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1"
+            className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <LogOut size={18} />
           </button>
