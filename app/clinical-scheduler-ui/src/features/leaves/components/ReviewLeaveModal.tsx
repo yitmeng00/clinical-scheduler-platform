@@ -2,10 +2,11 @@ import clsx from "clsx";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 
+import { useAppSelector } from "../../../app/hooks";
 import type { LeaveRequest } from "../../../types/leave";
 import { LEAVE_TYPE_LABELS } from "../../../types/leave";
 import { formatDateTime, formatLongDateRange } from "../../../utils/dateUtils";
-import { useReviewLeaveMutation } from "../leavesApi";
+import { useCancelLeaveMutation, useReviewLeaveMutation } from "../leavesApi";
 
 interface ReviewLeaveModalProps {
   leave: LeaveRequest;
@@ -30,8 +31,15 @@ export default function ReviewLeaveModal({
   canReview,
   onClose,
 }: ReviewLeaveModalProps) {
+  const myId = useAppSelector((s) => s.auth.user?.id);
   const [note, setNote] = useState("");
-  const [reviewLeave, { isLoading }] = useReviewLeaveMutation();
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [reviewLeave, { isLoading: reviewing }] = useReviewLeaveMutation();
+  const [cancelLeave, { isLoading: cancelling }] = useCancelLeaveMutation();
+
+  const isLoading = reviewing || cancelling;
+  // Mirrors the API rule: only the requester can cancel, and only while pending
+  const canCancel = leave.staffId === myId && leave.status === "Pending";
 
   const handleReview = async (action: "Approve" | "Reject") => {
     await reviewLeave({
@@ -40,6 +48,18 @@ export default function ReviewLeaveModal({
       note: note || undefined,
     }).unwrap();
     onClose();
+  };
+
+  const handleCancel = async () => {
+    setCancelError(null);
+    try {
+      await cancelLeave(leave.id).unwrap();
+      onClose();
+    } catch {
+      setCancelError(
+        "Couldn't cancel this request. It may have already been reviewed.",
+      );
+    }
   };
 
   return (
@@ -172,12 +192,29 @@ export default function ReviewLeaveModal({
             </div>
           )}
 
-          <button
-            onClick={onClose}
-            className="w-full mt-3 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
-          >
-            Close
-          </button>
+          {cancelError && (
+            <p role="alert" className="mt-4 text-sm text-red-600">
+              {cancelError}
+            </p>
+          )}
+
+          <div className="flex gap-3 mt-3">
+            {canCancel && (
+              <button
+                onClick={handleCancel}
+                disabled={isLoading}
+                className="flex-1 py-2.5 rounded-xl border border-red-200 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60 transition-colors cursor-pointer"
+              >
+                {cancelling ? "Cancelling…" : "Cancel Request"}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>

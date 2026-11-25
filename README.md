@@ -335,7 +335,7 @@ RefreshToken
 Staff submits request
         │
         ▼
-   [Pending] ─────────────────────── Staff cancels ──▶ [Cancelled]
+   [Pending] ─────────────────────── Staff cancels ──▶ (request deleted)
         │
         │  Reviewer: Admin / DeptLead / ChargeNurse
         ├──── Approve ──▶ [Approved]

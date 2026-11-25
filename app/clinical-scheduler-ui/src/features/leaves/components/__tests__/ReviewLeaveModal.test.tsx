@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -9,6 +10,7 @@ import {
   mockLeaveRequest,
   mockUser,
 } from "../../../../test/mocks/fixtures";
+import { server } from "../../../../test/mocks/server";
 import { renderWithProviders } from "../../../../test/utils/renderWithProviders";
 import ReviewLeaveModal from "../ReviewLeaveModal";
 
@@ -239,5 +241,82 @@ describe("ReviewLeaveModal", () => {
       { user: mockUser },
     );
     expect(screen.getByText(/auto_processed/)).toBeInTheDocument();
+  });
+
+  describe("cancel request", () => {
+    const CANCEL_URL = `http://localhost/api/v1/leaves/${mockLeaveRequest.id}`;
+
+    it("shows Cancel Request for the requester's own pending leave", () => {
+      renderPending();
+      expect(
+        screen.getByRole("button", { name: "Cancel Request" }),
+      ).toBeInTheDocument();
+    });
+
+    it("does NOT show Cancel Request on someone else's pending leave", () => {
+      renderWithProviders(
+        <ReviewLeaveModal
+          leave={mockLeaveRequest}
+          canReview={true}
+          onClose={vi.fn()}
+        />,
+        { user: mockDeptLeadUser },
+      );
+      expect(
+        screen.queryByRole("button", { name: "Cancel Request" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does NOT show Cancel Request once the leave has been reviewed", () => {
+      renderWithProviders(
+        <ReviewLeaveModal
+          leave={{ ...mockLeaveRequest, status: "Approved" }}
+          canReview={false}
+          onClose={vi.fn()}
+        />,
+        { user: mockUser },
+      );
+      expect(
+        screen.queryByRole("button", { name: "Cancel Request" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("calls DELETE /leaves/:id and closes on success", async () => {
+      let deleted = false;
+      server.use(
+        http.delete(CANCEL_URL, () => {
+          deleted = true;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      renderPending(false, onClose);
+      await user.click(screen.getByRole("button", { name: "Cancel Request" }));
+      await waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+      expect(deleted).toBe(true);
+    });
+
+    it("shows an error and stays open when the API rejects the cancel", async () => {
+      server.use(
+        http.delete(CANCEL_URL, () =>
+          HttpResponse.json(
+            { message: "Only pending leave requests can be cancelled." },
+            { status: 409 },
+          ),
+        ),
+      );
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      renderPending(false, onClose);
+      await user.click(screen.getByRole("button", { name: "Cancel Request" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Couldn't cancel this request",
+      );
+      expect(onClose).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "Cancel Request" }),
+      ).toBeEnabled();
+    });
   });
 });
